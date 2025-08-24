@@ -1,5 +1,5 @@
 import Inquiry from '@/components/auth/Inquiry';
-import LogIn from '@/components/auth/Login';
+import LogIn from '@/components/auth/LogIn'
 
 const LoginPage = () => {
   return (
