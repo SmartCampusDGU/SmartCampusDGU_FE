@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { AccountIcon } from "@/assets/icons/AccountIcon";
 import { LogoutIcon } from "@/assets/icons/LogoutIcon";
 
@@ -6,11 +7,13 @@ const Header = () => {
     <div className="w-full h-[84px] flex-shrink-0 bg-[var(--white)] flex items-center px-[39px]">
       {/* 왼쪽: 로고 */}
       <div className="flex items-center">
+        <Link to="/main">
         <img
           src="/logos/DGU_ENG.png"
           alt="동국대학교 영문 로고"
-          className="w-[173px] h-[80px] flex-shrink-0 [aspect-ratio:173/80]"
+          className="w-[173px] h-[80px] flex-shrink-0 [aspect-ratio:173/80] cursor-pointer"
         />
+        </Link>
         <span className="ml-[15px] text-[24px] font-bold leading-none font-inter text-[var(--black)]">
           캠퍼스 안전 모니터링 시스템
         </span>
