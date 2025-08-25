@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LogInPage from '@/pages/auth/LogIn';
 import MainPage from '@/pages/main/Main';
 import FacilitiesPage from '@/pages/facilities/Facilities';
+import MeasurementsPage from '@/pages/measurements/Measurements';
+
 import Layout from '@/components/layout/Layout'
 
 function AppRouter() {
@@ -17,6 +19,7 @@ function AppRouter() {
           <Route path="/main" element={<MainPage />} />
            {/* 시설 관리 페이지 */}
           <Route path="/facilities" element={<FacilitiesPage />} />
+          <Route path="/measurements" element={<MeasurementsPage />} />
         </Route>
       </Routes>
     </Router>
