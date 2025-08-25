@@ -13,7 +13,7 @@ export interface AlertRow {
   location: string;     // '3101호'
   anomaly: string;      // 'CO2 초과'
   duration: string;     // '30분 경과'
-  actor?: string;       // '김무성'
+  actor?: string;      // 조치자명
 }
 
 /** 색상/텍스트 매핑 */
@@ -42,14 +42,10 @@ function SeverityCell({ severity }: { severity: Severity }) {
 
   return (
     <div className="flex items-center justify-center">
-      {/* 원 */}
       <svg width="12" height="12" viewBox="0 0 12 12" className="shrink-0 block">
         <circle cx="6" cy="6" r="6" fill={fill} />
       </svg>
-
-      {/* ← 여기 margin-left로 간격 고정 */}
       <span className="ml-[10px] text-[13px]">{label}</span>
-      {/* 필요하면 12px이면 ml-[12px], 더 넓게는 ml-[20px] 등으로 조정 */}
     </div>
   );
 }
