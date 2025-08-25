@@ -19,6 +19,18 @@ const MOCK: SpaceRow[] = [
   { id: '6',  type: '실험실', roomNo: '1006', tags: ['temperature', 'tvoc'] },
   { id: '7',  type: '강의실', roomNo: '1007', tags: [] },
   { id: '8',  type: '실험실', roomNo: '1008', tags: ['humidity'] },
+   { id: '9',  type: '강의실', roomNo: '1009', tags: ['co2', 'tvoc'] },
+  { id: '10', type: '실험실', roomNo: '1010', tags: ['temperature'] },
+  { id: '11', type: '강의실', roomNo: '1011', tags: ['humidity'] },
+  { id: '12', type: '실험실', roomNo: '1012', tags: [] },
+  { id: '13', type: '강의실', roomNo: '1013', tags: ['temperature', 'humidity', 'co2'] },
+  { id: '14', type: '실험실', roomNo: '1014', tags: ['tvoc', 'co2'] },
+  { id: '15', type: '강의실', roomNo: '1015', tags: [] },
+  { id: '16', type: '실험실', roomNo: '1016', tags: ['temperature', 'humidity'] },
+  { id: '17', type: '강의실', roomNo: '1017', tags: ['tvoc'] },
+  { id: '18', type: '실험실', roomNo: '1018', tags: ['co2'] },
+  { id: '19', type: '강의실', roomNo: '1019', tags: ['humidity', 'tvoc'] },
+  { id: '20', type: '실험실', roomNo: '1020', tags: [] },
 ];
 
 export default function SpaceList() {
@@ -103,9 +115,12 @@ export default function SpaceList() {
                   </div>
                 </Td>
                 <Td className="text-right">
-                  <button className="px-3 py-1 rounded border border-[#ACACAC] bg-white hover:bg-[#F6F6F6]">
-                    상세페이지
-                  </button>
+                 <button
+  className="w-[182px] h-[56px] shrink-0 border border-[#7C7C7C] bg-[#F7FCFF] 
+             flex items-center justify-center font-inter text-[20px] font-medium text-black"
+>
+  상세페이지
+</button>
                 </Td>
               </tr>
             ))}
@@ -124,7 +139,6 @@ export default function SpaceList() {
   );
 }
 
-/* 탭 버튼 - 이미지와 유사한 느낌(활성: 노랑 배경, 비활성: 회색 박스) */
 function TabButton({
   active,
   onClick,
@@ -144,11 +158,7 @@ function TabButton({
       }
     >
       <span
-        className="text-center font-inter text-[27px] font-extrabold leading-normal text-[#1A1A1A]"
-        style={{
-          WebkitTextStrokeWidth: '1px',
-          WebkitTextStrokeColor: '#7C7C7C',
-        }}
+        className="text-center font-inter text-[27px] font-extrabold leading-normal text-black"
       >
         {children}
       </span>
