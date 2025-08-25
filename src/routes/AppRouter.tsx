@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LogInPage from '@/pages/auth/LogIn';
 import MainPage from '@/pages/main/Main';
+import FacilitiesPage from '@/pages/facilities/Facilities';
 import Layout from '@/components/layout/Layout'
 
 function AppRouter() {
@@ -12,8 +13,10 @@ function AppRouter() {
 
         {/* 헤더가 포함된 Layout */}
         <Route element={<Layout />}>
+         {/* 메인 페이지 */}
           <Route path="/main" element={<MainPage />} />
-          {/* 다른 페이지들 추가 */}
+           {/* 시설 관리 페이지 */}
+          <Route path="/facilities" element={<FacilitiesPage />} />
         </Route>
       </Routes>
     </Router>
