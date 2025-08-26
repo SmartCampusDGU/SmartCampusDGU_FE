@@ -1,0 +1,69 @@
+/* 팝업 박스 */
+.dp {
+  display: flex;
+  width: 306px;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 10px;
+  background: var(--Gray-0, #FFF);
+  box-shadow: 0 4px 12px 0 rgba(31, 61, 136, 0.15);
+}
+
+/* 팝퍼 레이어 z-index */
+.popper { z-index: 9999; }
+
+/* react-datepicker 내부 클래스 커스텀 */
+.dp :global(.react-datepicker__triangle) { display: none; }
+.dp :global(.react-datepicker__header) { background: transparent; border: 0; padding: 0; }
+.dp :global(.react-datepicker__month-container) {
+  width: 100%;
+  float: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dp :global(.react-datepicker__month) { margin: 0; }
+
+/* 3열 × 4행 그리드 */
+.dp :global(.react-datepicker__month-wrapper) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  justify-items: center; /* 셀 내부 수평 중앙 */
+  align-items: center;   /* 셀 내부 수직 중앙 */
+}
+
+/* 월 셀 기본 스타일 (숫자 1~12) */
+.dp :global(.react-datepicker__month-text) {
+  width: 45px;
+  height: 32px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 16px;
+  background: transparent;
+  color: #1D1B20;
+  box-shadow: none;
+  line-height: normal;
+}
+
+/* Hover */
+.dp :global(.react-datepicker__month-text:hover) {
+  background: #F5F5F5;
+}
+
+/* 키보드선택/범위 시작/끝: 버튼 스타일 매핑 */
+.dp :global(.react-datepicker__month-text--selected),
+.dp :global(.react-datepicker__month-text--keyboard-selected),
+.dp :global(.react-datepicker__month-text--range-start),
+.dp :global(.react-datepicker__month-text--range-end) {
+  background: var(--Primary-500, #80A9F2);
+  color: #FFF;
+  box-shadow: 0 4px 4px 0 rgba(128, 169, 242, 0.25);
+  font-weight: 700;
+}

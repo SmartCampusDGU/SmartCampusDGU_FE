@@ -1,3 +1,4 @@
+@import url('./reset.css'); 
 @tailwind utilities;
 
 @font-face {
@@ -29,5 +30,9 @@
     --black: #000000;
     --gray: #7C7C7C;
     --orange: #DA5B00;
+
+    --design-w: 1440;
+    --design-h: 1024;
+    --scale: min(100vw / var(--design-w), 100vh / var(--design-h));
   }
 }
