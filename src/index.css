@@ -1,1 +1,63 @@
 @import "tailwindcss";
+@import url('./reset.css'); 
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/InterDisplay-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/InterDisplay-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/InterDisplay-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@theme {
+  --white: #FFFFFF;
+    --white-02: #F6F6F6;
+    --black: #000000;
+    --gray: #7C7C7C;
+    --orange: #DA5B00;
+}
+
+@layer base {
+  html,
+  body {
+    font-family: 'Inter';
+    background-color: #F6F6F6;
+    box-sizing: border-box;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+@media (max-width: 1440px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
+::-webkit-scrollbar-track {
+  background: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #999898;
+  border-radius: 15px;
+}
