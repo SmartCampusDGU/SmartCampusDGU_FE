@@ -1,6 +1,8 @@
+import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
 import SpaceList from '@/components/facilities/SpaceList'
 
 export default function Facilities() {
+  useSetPageTitle("공간 유형별 호실 목록");
   return (
     <div className="mx-auto w-full max-w-[1600px] px-6 bg-[var(--white-02)]">
       {/* "호실 추가하기" 버튼 */}
@@ -13,15 +15,7 @@ export default function Facilities() {
           </span>
         </button>
       </div>
-       {/* 상단 구분선 */}
-      <div
-        className="mx-auto"
-        style={{
-          width: '1010.008px',
-          height: '1px',
-          backgroundColor: '#7C7C7C',
-        }}
-      />
+      
       {/* 공간 리스트 */}
       <div className="mt-6">
         <SpaceList />

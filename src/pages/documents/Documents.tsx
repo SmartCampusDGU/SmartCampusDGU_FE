@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
 import PeriodPanel from "@/components/documents/PeriodPanel";
 import { PreviewModal } from "@/components/documents/PreviewModal";
 import FilePreviewer from "@/components/documents/FilePreviewer";
 
 export default function Documents() {
+  useSetPageTitle("보고서 제작");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
 
@@ -14,10 +16,6 @@ export default function Documents() {
 
   return (
     <div className="mx-auto w-full max-w-[1600px] min-h-screen px-6 bg-[var(--white-02)]">
-      <div
-        className="mx-auto"
-        style={{ width: "1010.008px", height: "1px", backgroundColor: "#7C7C7C" }}
-      />
       <div className="mt-6 flex justify-center">
         <PeriodPanel onPreview={handlePreview} />
       </div>
