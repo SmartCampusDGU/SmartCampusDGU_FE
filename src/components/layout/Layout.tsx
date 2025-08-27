@@ -2,10 +2,13 @@ import { Outlet, useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Sidebar from "./Sidebar";
 import { usePageTitle } from "@/hooks/common/usePageTitle";
+import { useContext } from "react";
+import { ActiveNavContext } from "@/contexts/ActiveNavContext";
 
 export default function Layout() {
   const navigate = useNavigate();
   const pageTitle = usePageTitle();
+  const activeNav = useContext(ActiveNavContext); 
 
   return (
     <div className="min-h-screen flex flex-col bg-white-02">
@@ -15,8 +18,12 @@ export default function Layout() {
       {/* 헤더 바로 아래, 사이드바 + 메인 영역 */}
       <div className="flex w-full">
         {/* 사이드바 */}
-        <Sidebar
-          onNavigate={(href) => {
+       <Sidebar
+          activeGroupKey={activeNav?.group}
+          activeItemKey={activeNav?.item}
+          onNavigate={(href, g, i) => {
+            // 클릭 시 활성키 갱신
+            activeNav?.setActiveNav({ group: g, item: i });
             if (href) navigate(href);
           }}
         />

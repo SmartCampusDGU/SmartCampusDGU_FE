@@ -5,11 +5,13 @@ import FacilitiesPage from '@/pages/facilities/Facilities';
 import MeasurementsPage from '@/pages/measurements/Measurements';
 import DocumentsPage from '@/pages/documents/Documents'
 import { PageTitleProvider } from "@/contexts/PageTitleContext";
+import { ActiveNavProvider } from "@/contexts/ActiveNavContext";
 import Layout from '@/components/layout/Layout'
 
 function AppRouter() {
   return (
     <Router>
+       <ActiveNavProvider>
       <PageTitleProvider>
       <Routes>
         {/* 로그인 페이지 (헤더 없음) */}
@@ -26,6 +28,7 @@ function AppRouter() {
         </Route>
       </Routes>
       </PageTitleProvider>
+      </ActiveNavProvider>
     </Router>
   );
 }
