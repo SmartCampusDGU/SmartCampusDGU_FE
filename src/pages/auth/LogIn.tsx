@@ -16,6 +16,7 @@ const LoginPage = () => {
     try {
       const accessToken = await logIn({ username, password });
       login(accessToken);
+      console.log('로그인 성공');
       navigate('/main');
     } catch (error) {
       console.error(error);
