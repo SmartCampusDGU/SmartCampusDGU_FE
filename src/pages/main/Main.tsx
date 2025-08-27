@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
 import { AlertsTable } from '@/components/main/AlertsTable';
 import type { AlertRow } from '@/components/main/AlertsTable';
 
 export default function MainPage() {
+  useSetPageTitle("이상치 조회");
   const [rows, setRows] = useState<AlertRow[]>([
     {
       id: '1',
