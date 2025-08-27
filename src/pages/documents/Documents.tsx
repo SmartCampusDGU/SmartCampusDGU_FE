@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
+import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
 import PeriodPanel from "@/components/documents/PeriodPanel";
 import { PreviewModal } from "@/components/documents/PreviewModal";
 import FilePreviewer from "@/components/documents/FilePreviewer";
 
 export default function Documents() {
   useSetPageTitle("보고서 제작");
+  useSetActiveNav("", "doc");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
 

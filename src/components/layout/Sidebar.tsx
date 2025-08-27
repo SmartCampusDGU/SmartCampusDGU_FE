@@ -3,7 +3,7 @@ import clsx from 'clsx'
 
 /** ===== 타입 ===== */
 type NavItem = { key: string; label: string; href?: string }
-type NavGroup = { key: string; label: string; items?: NavItem[] }
+type NavGroup = { key: string; label: string; href?: string; items?: NavItem[] }
 
 type SidebarProps = {
   /** 현재 페이지가 속한 대분류 key (예: 'facility', 'sensor', 'doc' ...) */
@@ -21,22 +21,22 @@ const ACTIVE_ITEM_BG = 'bg-[rgba(218,91,0,0.07)]'
 
 /** ===== 전역 메뉴 데이터 ===== */
 export const NAV_GROUPS: NavGroup[] = [
-  { key: 'search', label: '조회', items: [{ key: 'abnormal', label: '이상치 조회' }] },
+  { key: 'search', label: '조회', items: [{ key: 'abnormal', label: '이상치 조회', href: "/main" }] },
   {
     key: 'facility',
     label: '시설 관리',
-    items: [{ key: 'room-list', label: '공간 리스트' }],
+    items: [{ key: 'room-list', label: '공간 리스트', href: "/facilities" }],
   },
   {
     key: 'sensor',
     label: '센서 관리',
     items: [
       { key: 'sensor-setting', label: '센서 설정' },
-      { key: 'type-threshold', label: '유형별 센서 설정' },
+      { key: 'type-threshold', label: '유형별 센서 설정', href: "/measurements" },
       { key: 'alert', label: '알림 설정' },
     ],
   },
-  { key: 'doc', label: '문서 작업' },                    // ← items 없음 (대메뉴 단독)
+  { key: 'doc', label: '문서 작업', href: "/documents" },                    // ← items 없음 (대메뉴 단독)
   { key: 'admin', label: '관리자 계정 관리' },           // ← items 없음 (대메뉴 단독)
 ]
 
@@ -68,7 +68,7 @@ export default function Sidebar({
                 setOpen((prev) => ({ ...prev, [g.key]: !prev[g.key] }))
               } else {
                 // 하위 메뉴가 없으면 곧바로 그룹 내비게이션
-                onNavigate?.(undefined, g.key, undefined)
+                onNavigate?.(g.href, g.key, undefined)
               }
             }
 
@@ -121,4 +121,3 @@ export default function Sidebar({
     </aside>
   )
 }
-

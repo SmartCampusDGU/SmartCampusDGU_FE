@@ -1,8 +1,10 @@
 import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
+import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
 import SpaceList from '@/components/facilities/SpaceList'
 
 export default function Facilities() {
-  useSetPageTitle("공간 유형별 호실 목록");
+  useSetPageTitle("공간 리스트");
+  useSetActiveNav("facility", "room-list");
   return (
     <div className="mx-auto w-full max-w-[1600px] px-6 bg-[var(--white-02)]">
       {/* "호실 추가하기" 버튼 */}
