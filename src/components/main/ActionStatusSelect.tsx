@@ -36,8 +36,8 @@ export default function ActionStatusSelect({ value, onChange }: Props) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`w-full h-full flex items-center justify-center outline-none border-0
-          ${open ? 'bg-[rgba(218,91,0,0.36)] text-white' : 'bg-transparent text-black'}
+        className={`w-full h-full flex items-center justify-center outline-none border-0 text-black
+          ${open ? 'bg-[rgba(218,91,0,0.36)]' : 'bg-transparent'}
         `}
       >
         <span className="text-[13px]">{ACTION_TEXT[value]}</span>
@@ -46,7 +46,7 @@ export default function ActionStatusSelect({ value, onChange }: Props) {
 
       {/* 드롭다운: 전체 배경을 #FFCBA6 36%로 */}
       {open && (
-        <div className="absolute left-0 top-full z-20 w-full bg-[rgba(255,203,166,0.36)]">
+        <div className="absolute left-0 top-full z-20 w-full bg-[#FFCBA6]">
           {options.map((opt) => (
             <button
               key={opt}
