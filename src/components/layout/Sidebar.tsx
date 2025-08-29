@@ -6,9 +6,10 @@ type NavItem = { key: string; label: string; href?: string }
 type NavGroup = { key: string; label: string; href?: string; items?: NavItem[] }
 
 type SidebarProps = {
+  className?: string;
   /** 현재 페이지가 속한 대분류 key (예: 'facility', 'sensor', 'doc' ...) */
   activeGroupKey?: string
-  /** 현재 상세 버튼 key (예: 'room-list', 'alert' ...) */
+  /** 현재 상세 버튼 key (예: 'room-list', 'type-threshold' ...) */
   activeItemKey?: string
   /** 라우팅 없을 때도 동작하도록 콜백 제공 */
   onNavigate?: (href?: string, g?: string, i?: string) => void
@@ -33,7 +34,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: 'sensor-setting', label: '센서 설정' },
       { key: 'type-threshold', label: '유형별 센서 설정', href: "/measurements" },
-      { key: 'alert', label: '알림 설정' },
+      { key: 'reminder', label: '재알람 설정', href: "/reminder" },
     ],
   },
   { key: 'doc', label: '문서 작업', href: "/documents" },                    // ← items 없음 (대메뉴 단독)
@@ -41,6 +42,7 @@ export const NAV_GROUPS: NavGroup[] = [
 ]
 
 export default function Sidebar({
+  className,
   activeGroupKey,
   activeItemKey,
   onNavigate,
@@ -55,7 +57,11 @@ export default function Sidebar({
   }, [activeGroupKey])
 
   return (
-    <aside className="w-[220px] shrink-0 bg-[#F7FCFF] border-r border-gray-200">
+    <aside className={clsx(
+        "w-[220px] shrink-0 bg-[#F7FCFF] border-r border-gray-200",
+        className                         // ← 적용
+      )}
+      >
       <div className="p-3">
         <nav className="flex flex-col gap-2">
           {NAV_GROUPS.map((g) => {
@@ -64,7 +70,7 @@ export default function Sidebar({
             const isOpen = open[g.key]
 
             const handleGroupClick = () => {
-              if (hasItems) {
+              if (hasItems) { 
                 setOpen((prev) => ({ ...prev, [g.key]: !prev[g.key] }))
               } else {
                 // 하위 메뉴가 없으면 곧바로 그룹 내비게이션

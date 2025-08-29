@@ -1,260 +1,211 @@
-import React, { useEffect, useMemo, useState } from "react";
+// src/pages/Reminder.tsx
+import { useContext, useEffect, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import clsx from "clsx";
+import { ActiveNavContext } from "@/contexts/ActiveNavContext";
+import { useSetPageTitle } from "@/hooks/common/useSetPageTitle";
+import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
 
-/**
- * 스마트 캠퍼스 – 재알림 설정 페이지
- * 환경: React + TypeScript + TailwindCSS (라우터는 앱에 맞춰 감싸서 사용)
- * 백엔드: Spring Boot REST 가정
- *   GET  /api/alerts/settings           현재값 조회
- *   PUT/PUT /api/alerts/settings      저장
- *   요청/응답 포맷 (예시)
- *   {
- *     dangerIntervalMin: number,   // 위험 단계 재알림 주기(분)
- *     warningIntervalMin: number,  // 경고 단계 재알림 주기(분)
- *     postActionIntervalMin: number // 조치 후 재알림(분)
- *   }
- */
+type HM = { hour: string; minute: string };
 
-// -------------------- 유틸 --------------------
-function clamp(n: number, min: number, max: number) { return Math.min(Math.max(n, min), max); }
+/* ── 스타일 토큰 ───────────────────────────────────────────── */
+const CARD = "bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-gray-200";
+const FIELD = "h-11 px-3 rounded-lg border border-[#2F73DA] outline-none focus:ring-2 focus:ring-[#DA5B00]";
+const H2 = "text-[20px] font-extrabold";
+const SUB = "text-sm text-gray-500";
+const SAVE_BTN = "h-11 rounded-lg bg-[#DA5B00] text-white font-semibold disabled:opacity-50";
+const GHOST_BTN = "h-11 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50";
 
-function toInt(v: string): number | undefined {
-  if (v === "" || v == null) return undefined;
-  const n = Number(v);
-  return Number.isFinite(n) ? Math.trunc(n) : undefined;
+/* ── 유틸 ─────────────────────────────────────────────────── */
+function onlyDigits(v: string) { return v.replace(/\D/g, ""); }
+function clamp(n: number, min: number, max: number) { return Math.max(min, Math.min(max, n)); }
+function normalizeHM(hm: HM): HM {
+  const h = hm.hour === "" ? "" : String(clamp(Number(hm.hour), 0, 23));
+  const m = hm.minute === "" ? "" : String(clamp(Number(hm.minute), 0, 59));
+  return { hour: h, minute: m };
 }
-
-function hhmmToMinutes(hh?: number, mm?: number) {
-  const h = hh ?? 0; const m = mm ?? 0;
-  return clamp(h, 0, 23) * 60 + clamp(m, 0, 59);
+function isHMValid(hm: HM) {
+  if (hm.hour === "" || hm.minute === "") return false;
+  const h = Number(hm.hour), m = Number(hm.minute);
+  return !Number.isNaN(h) && !Number.isNaN(m) && h >= 0 && h <= 23 && m >= 0 && m <= 59;
 }
+const fmt = (hm: HM) => `${hm.hour}시간 ${hm.minute}분`;
 
-function minutesToHHMM(total?: number): { hh: string; mm: string } {
-  if (!total && total !== 0) return { hh: "", mm: "" };
-  const h = Math.floor(total / 60);
-  const m = total % 60;
-  return { hh: String(h), mm: String(m) };
-}
-
-// -------------------- 작은 입력 컴포넌트 --------------------
-interface HHMMProps {
-  label: string;
-  valueMin?: number; // 분단위
-  onChange: (min: number) => void;
-}
-
-function HHMMInput({ label, valueMin, onChange }: HHMMProps) {
-  const { hh, mm } = useMemo(() => minutesToHHMM(valueMin), [valueMin]);
-  const [localH, setLocalH] = useState(hh);
-  const [localM, setLocalM] = useState(mm);
-
-  // 외부값 변경 시 내부 입력 동기화
-  useEffect(() => { setLocalH(hh); setLocalM(mm); }, [hh, mm]);
-
-  function apply(hStr: string, mStr: string) {
-    const h = clamp(toInt(hStr) ?? 0, 0, 23);
-    const m = clamp(toInt(mStr) ?? 0, 0, 59);
-    onChange(h * 60 + m);
-  }
-
-  return (
-    <div className="space-y-2">
-      <p className="text-sm font-medium text-gray-800">{label}</p>
-      <div className="flex items-center gap-2">
-        <input
-          aria-label="시간"
-          inputMode="numeric"
-          placeholder="시간"
-          value={localH}
-          onChange={(e) => setLocalH(e.target.value)}
-          onBlur={() => apply(localH, localM)}
-          className="w-36 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-        />
-        <span className="text-sm text-gray-600">시간</span>
-        <input
-          aria-label="분"
-          inputMode="numeric"
-          placeholder="분"
-          value={localM}
-          onChange={(e) => setLocalM(e.target.value)}
-          onBlur={() => apply(localH, localM)}
-          className="w-36 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-        />
-        <span className="text-sm text-gray-600">분</span>
-      </div>
-      <p className="text-xs text-gray-500">허용범위: 0~23시간 / 0~59분</p>
-    </div>
-  );
-}
-
-// -------------------- API 래퍼 --------------------
-async function apiGetSettings(signal?: AbortSignal) {
-  const res = await fetch("/api/alerts/settings", { credentials: "include", signal });
-  if (!res.ok) throw new Error("설정 조회 실패");
-  return (await res.json()) as {
-    dangerIntervalMin: number;
-    warningIntervalMin: number;
-    postActionIntervalMin: number;
-  };
-}
-
-async function apiSaveSettings(payload: {
-  dangerIntervalMin: number;
-  warningIntervalMin: number;
-  postActionIntervalMin: number;
-}) {
-  const res = await fetch("/api/alerts/settings", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error("설정 저장 실패");
-  return res.json();
-}
-
-// -------------------- 메인 페이지 --------------------
-export default function Reminder() {
-  // 분 단위로 보관
-  const [dangerMin, setDangerMin] = useState<number | undefined>();
-  const [warningMin, setWarningMin] = useState<number | undefined>();
-  const [postActionMin, setPostActionMin] = useState<number | undefined>();
-
-  const [loading, setLoading] = useState(true);
-  const [savingLeft, setSavingLeft] = useState(false);
-  const [savingRight, setSavingRight] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [ok, setOk] = useState<string | null>(null);
-
+/* ── 페이지 ──────────────────────────────────────────────── */
+export default function ReminderPage() {
+  useSetPageTitle("위험 단계 재알림 설정");
+  useSetActiveNav("sensor", "reminder");
+  // 사이드바 활성 (센서 관리 > 재알람 설정)
+  const activeNav = useContext(ActiveNavContext);
   useEffect(() => {
-    const ctrl = new AbortController();
-    (async () => {
-      try {
-        const d = await apiGetSettings(ctrl.signal);
-        setDangerMin(d.dangerIntervalMin);
-        setWarningMin(d.warningIntervalMin);
-        setPostActionMin(d.postActionIntervalMin);
-      } catch (e: any) {
-        setError(e?.message ?? "네트워크 오류");
-      } finally {
-        setLoading(false);
-      }
-    })();
-    return () => ctrl.abort();
+    activeNav?.setActiveNav({ group: "sensor", item: "reminder" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function saveLeft() {
-    if (dangerMin == null || warningMin == null) return;
-    setSavingLeft(true); setError(null); setOk(null);
-    try {
-      await apiSaveSettings({
-        dangerIntervalMin: dangerMin,
-        warningIntervalMin: warningMin,
-        postActionIntervalMin: postActionMin ?? 0,
-      });
-      setOk("저장되었습니다.");
-    } catch (e: any) {
-      setError(e?.message ?? "저장 실패");
-    } finally { setSavingLeft(false); }
-  }
+  // 폼 상태
+  const [dangerHM, setDangerHM]   = useState<HM>({ hour: "", minute: "" }); // 위험
+  const [warnHM, setWarnHM]       = useState<HM>({ hour: "", minute: "" }); // 경고
+  const [afterActHM, setAfterAct] = useState<HM>({ hour: "", minute: "" }); // 조치 후
 
-  async function saveRight() {
-    if (postActionMin == null) return;
-    setSavingRight(true); setError(null); setOk(null);
-    try {
-      await apiSaveSettings({
-        dangerIntervalMin: dangerMin ?? 0,
-        warningIntervalMin: warningMin ?? 0,
-        postActionIntervalMin: postActionMin,
-      });
-      setOk("저장되었습니다.");
-    } catch (e: any) {
-      setError(e?.message ?? "저장 실패");
-    } finally { setSavingRight(false); }
-  }
+  const isLeftValid  = isHMValid(dangerHM) && isHMValid(warnHM);
+  const isRightValid = isHMValid(afterActHM);
 
-  if (loading) {
-    return <div className="p-8 text-gray-700">불러오는 중…</div>;
-  }
+  // 초기값 로드 (데모용 — API 연동 시 교체)
+  useEffect(() => {
+    setDangerHM({ hour: "1", minute: "0" });
+    setWarnHM({ hour: "0", minute: "30" });
+    setAfterAct({ hour: "1", minute: "0" });
+  }, []);
+
+  // 공통 입력 핸들러
+  const onHMChange =
+    (setter: Dispatch<SetStateAction<HM>>, key: keyof HM) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = onlyDigits(e.target.value);
+      setter(prev => normalizeHM({ ...prev, [key]: raw } as HM));
+    };
+
+  // 액션
+  const resetLeft = () => { setDangerHM({ hour: "", minute: "" }); setWarnHM({ hour: "", minute: "" }); };
+  const resetRight = () => setAfterAct({ hour: "", minute: "" });
+
+  const handleSaveLevels = async () => {
+    if (!isLeftValid) return;
+    // TODO: await api.save({ danger: dangerHM, warn: warnHM });
+    alert(`[저장] 위험 ${fmt(dangerHM)} / 경고 ${fmt(warnHM)}`);
+  };
+  const handleSaveAfterAct = async () => {
+    if (!isRightValid) return;
+    // TODO: await api.save({ afterAction: afterActHM });
+    alert(`[저장] 조치 후 ${fmt(afterActHM)}`);
+  };
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] bg-[#F6F6F6]">
-      {/* 좌측 사이드바 (간략 Mock) */}
-      <aside className="w-64 border-r bg-white">
-        <div className="px-5 py-4 text-sm font-semibold">신공학관</div>
-        {[
-          "조회",
-          "시설 관리",
-          "센서 관리",
-          "센서 설정",
-          "유형별 센서 설정",
-          "알람 설정",
-          "문서 작업",
-          "관리자 계정 관리",
-        ].map((label, i) => (
-          <div key={i} className={`px-5 py-3 text-sm ${label === "센서 관리" ? "bg-amber-50 font-semibold text-amber-800" : "text-gray-700"}`}>
-            {label}
-          </div>
-        ))}
-      </aside>
+    <div className="w-full">
+      {/* 상단 회색 바/구분선은 사용하지 않음 */}
 
-      {/* 메인 */}
-      <main className="mx-auto w-full max-w-[1100px] p-8">
-        <h1 className="mb-6 text-xl font-bold text-gray-900">재알림 설정</h1>
+      {/* 좌/우 카드: 간격 넓힘 */}
+      <div className="mt-4 grid grid-cols-1 gap-25 xl:grid-cols-[minmax(0,1fr)_420px]">
+        {/* 왼쪽: 단계별 */}
+        <section className={clsx(CARD, "p-6")}>
+          <header className="mb-2">
+            <p className={SUB}>
+              센서 이상치 경고 알람을 확인하지 않은 경우, 일정 주기마다 관리자에게 재알림이 발송됩니다. <br />
+              이상치 위험 등급 별로 재알림 주기를 다르게 설정할 수 있습니다.
+            </p>
+          </header>
 
-        {/* 2 컬럼 카드 */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* 왼쪽 카드 */}
-          <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-base font-semibold text-gray-900">위험 단계별 재알림 설정</h2>
-            <div className="space-y-8">
-              <div>
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-gray-600" />
-                  <span className="text-sm font-medium text-gray-800">위험 단계 재알림 주기</span>
-                </div>
-                <HHMMInput label="" valueMin={dangerMin} onChange={setDangerMin} />
-              </div>
-
-              <div>
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-gray-600" />
-                  <span className="text-sm font-medium text-gray-800">경고 단계 재알림 주기</span>
-                </div>
-                <HHMMInput label="" valueMin={warningMin} onChange={setWarningMin} />
-              </div>
-
-              <button
-                onClick={saveLeft}
-                disabled={savingLeft}
-                className="mt-2 w-full rounded-lg bg-[#D06000] px-4 py-3 text-sm font-semibold text-white hover:bg-[#B95300] disabled:opacity-60"
-              >
-                {savingLeft ? "저장 중…" : "저장하기"}
-              </button>
+          {/* 위험 */}
+          <div className="mt-6 space-y-4">
+            <div className="flex flex-col gap-1">
+            <span className="text-[16px] font-semibold">• 위험 단계 재알림 주기</span>
+            <p  className="text-gray-500 text-sm">
+                위험 단계는 보다 짧은 주기를 설정할 것을 권장합니다.
+            </p>  
             </div>
-          </section>
-
-          {/* 오른쪽 카드 */}
-          <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-6 text-base font-semibold text-gray-900">조치 후 재알림 설정</h2>
-            <HHMMInput label="조치 후 재알림" valueMin={postActionMin} onChange={setPostActionMin} />
-            <button
-              onClick={saveRight}
-              disabled={savingRight}
-              className="mt-6 w-full rounded-lg bg-[#D06000] px-4 py-3 text-sm font-semibold text-white hover:bg-[#B95300] disabled:opacity-60"
-            >
-              {savingRight ? "저장 중…" : "저장하기"}
-            </button>
-          </section>
-        </div>
-
-        {/* 상태 메시지 */}
-        {(error || ok) && (
-          <div className="mt-6">
-            {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-            {ok && <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{ok}</div>}
+            <div className="flex items-center gap-4 mt-3">
+              <input
+                className={FIELD + " w-full"}
+                placeholder="시간"
+                value={dangerHM.hour}
+                onChange={onHMChange(setDangerHM, "hour")}
+                inputMode="numeric"
+                maxLength={2}
+              />
+              <input
+                className={FIELD + " w-full"}
+                placeholder="분"
+                value={dangerHM.minute}
+                onChange={onHMChange(setDangerHM, "minute")}
+                inputMode="numeric"
+                maxLength={2}
+              />
+            </div>
+            {!isHMValid(dangerHM) && (
+              <p className="text-xs text-red-500">시간/분을 0–23 / 0–59 범위로 입력하세요.</p>
+            )}
           </div>
-        )}
-      </main>
+
+          {/* 경고 */}
+          <div className="mt-8 space-y-4">
+            <span className="text-[16px] font-semibold">• 경고 단계 재알림 주기</span>
+            <div className="flex items-center gap-4 mt-3">
+              <input
+                className={FIELD + " w-full"}
+                placeholder="시간"
+                value={warnHM.hour}
+                onChange={onHMChange(setWarnHM, "hour")}
+                inputMode="numeric"
+                maxLength={2}
+              />
+              <input
+                className={FIELD + " w-full"}
+                placeholder="분"
+                value={warnHM.minute}
+                onChange={onHMChange(setWarnHM, "minute")}
+                inputMode="numeric"
+                maxLength={2}
+              />
+            </div>
+            {!isHMValid(warnHM) && (
+              <p className="text-xs text-red-500">시간/분을 0–23 / 0–59 범위로 입력하세요.</p>
+            )}
+          </div>
+
+          {/* 액션 */}
+          <div className="mt-8 flex gap-2">
+            <button type="button" className={clsx(SAVE_BTN, "flex-1")} onClick={handleSaveLevels} disabled={!isLeftValid}>
+              저장하기
+            </button>
+            <button type="button" className={clsx(GHOST_BTN, "px-4")} onClick={resetLeft}>
+              초기화
+            </button>
+          </div>
+        </section>
+
+        {/* 오른쪽: 조치 후 */}
+        <section className={clsx(CARD, "p-6")}>
+          <header className="mb-2">
+            <h2 className={H2}>조치 후 재알림 설정</h2>
+            <p className={SUB}>현장 조치 완료 후, 다음 알림까지의 대기 시간을 정합니다.</p>
+          </header>
+
+          <div className="mt-6 space-y-2">
+            <span className="text-[16px] font-semibold">• 조치 후 재알림 주기</span>
+            <div className="flex items-center gap-3 mt-3">
+              <input
+                className={FIELD + " w-full"}
+                placeholder="시간"
+                value={afterActHM.hour}
+                onChange={onHMChange(setAfterAct, "hour")}
+                inputMode="numeric"
+                maxLength={2}
+              />
+              <input
+                className={FIELD + " w-full"}
+                placeholder="분"
+                value={afterActHM.minute}
+                onChange={onHMChange(setAfterAct, "minute")}
+                inputMode="numeric"
+                maxLength={2}
+              />
+            </div>
+            {!isRightValid && (
+              <p className="text-xs text-red-500">시간/분을 0–23 / 0–59 범위로 입력하세요.</p>
+            )}
+          </div>
+
+          <div className="mt-8 flex gap-2">
+            <button type="button" className={clsx(SAVE_BTN, "flex-1")} onClick={handleSaveAfterAct} disabled={!isRightValid}>
+              저장하기
+            </button>
+            <button type="button" className={clsx(GHOST_BTN, "px-4")} onClick={resetRight}>
+              초기화
+            </button>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
+
