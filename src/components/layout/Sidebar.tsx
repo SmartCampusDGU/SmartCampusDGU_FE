@@ -38,7 +38,7 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   { key: 'doc', label: '문서 작업', href: "/documents" },                    // ← items 없음 (대메뉴 단독)
-  { key: 'admin', label: '관리자 계정 관리' },           // ← items 없음 (대메뉴 단독)
+  { key: 'administrator', label: '관리자 계정 관리', href: "/administrator" }, // ← items 없음 (대메뉴 단독)
 ]
 
 export default function Sidebar({

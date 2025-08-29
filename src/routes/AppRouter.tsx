@@ -5,9 +5,11 @@ import FacilitiesPage from '@/pages/facilities/Facilities';
 import MeasurementsPage from '@/pages/measurements/Measurements';
 import ReminderPage from '@/pages/reminder/Reminder';
 import DocumentsPage from '@/pages/documents/Documents'
+import AdministratorPage from '@/pages/administrator/Administrator';
 import { PageTitleProvider } from "@/contexts/PageTitleContext";
 import { ActiveNavProvider } from "@/contexts/ActiveNavContext";
 import Layout from '@/components/layout/Layout'
+
 
 function AppRouter() {
   return (
@@ -28,6 +30,8 @@ function AppRouter() {
           <Route path="/documents" element={<DocumentsPage />} />
           {/* 재알람 설정 페이지 */}
           <Route path="/reminder" element={<ReminderPage />} />
+          {/* 관리자 계정 설정 페이지 */}
+          <Route path="/administrator" element={<AdministratorPage />} />
         </Route>
       </Routes>
       </PageTitleProvider>
