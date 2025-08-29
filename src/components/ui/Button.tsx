@@ -3,7 +3,9 @@ import React from "react";
 
 interface ButtonProps {
   variant: "save" | "register" | "delete";
+  className?: string;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({ variant, onClick }) => {

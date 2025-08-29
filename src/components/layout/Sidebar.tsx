@@ -38,7 +38,7 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   { key: 'doc', label: '문서 작업', href: "/documents" },                    // ← items 없음 (대메뉴 단독)
-  { key: 'admin', label: '관리자 계정 관리' },           // ← items 없음 (대메뉴 단독)
+  { key: 'administrator', label: '관리자 계정 관리', href: "/administrator" }, // ← items 없음 (대메뉴 단독)
 ]
 
 export default function Sidebar({
@@ -71,7 +71,8 @@ export default function Sidebar({
 
             const handleGroupClick = () => {
               if (hasItems) { 
-                setOpen((prev) => ({ ...prev, [g.key]: !prev[g.key] }))
+                setOpen((prev) => ({ ...prev, [g.key]: !prev[g.key] }));
+                onNavigate?.(undefined, g.key, undefined);
               } else {
                 // 하위 메뉴가 없으면 곧바로 그룹 내비게이션
                 onNavigate?.(g.href, g.key, undefined)
@@ -81,7 +82,7 @@ export default function Sidebar({
             return (
               <div key={g.key}>
                 {/* 그룹 버튼 */}
-                <button
+                <button type="button"
                   className={clsx(
                     'w-full h-10 px-3 text-left text-[14px] rounded-[6px] flex items-center justify-between',
                     BORDER,
@@ -103,7 +104,7 @@ export default function Sidebar({
                       const isActiveItem = it.key === activeItemKey
                       return (
                         <li key={it.key}>
-                          <button
+                          <button type="button"
                             className={clsx(
                               'w-full h-9 px-3 text-left text-[13px] rounded-[6px]',
                               BORDER,
