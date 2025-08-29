@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import EditRoomTypeModal from '../modals/EditRoomTypeModal';
+import type { TypeFormValue } from '../modals/CreateRoomTypeModal';
 
 type DataRow = {
   id: string;
@@ -15,6 +17,19 @@ const MOCK: DataRow[] = [
 
 export default function DataTypeTable() {
   const [rows] = useState<DataRow[]>(MOCK);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentRow, setCurrentRow] = useState<DataRow | null>(null);
+
+  const handleDetailClick = (row: DataRow) => {
+    setCurrentRow(row);
+    setModalOpen(true);
+  };
+
+  const handleSave = (form: TypeFormValue) => {
+    // 저장 로직 예시 (선택 사항)
+    console.log("저장된 데이터:", form);
+  };
 
   return (
     <div className="w-full border-t border-[#ACACAC]">
@@ -54,7 +69,9 @@ export default function DataTypeTable() {
                 ))}
               </Td>
               <Td className="text-center">
-                <button className="w-[173.535px] h-[56px] rounded border border-[#7C7C7C] bg-[#FFE9AE] text-[16px] font-semibold">
+                <button 
+                className="w-[173.535px] h-[56px] rounded border border-[#7C7C7C] bg-[#FFE9AE] text-[16px] font-semibold"
+                onClick={() => handleDetailClick(r)}>
                   상세보기
                 </button>
               </Td>
@@ -62,6 +79,27 @@ export default function DataTypeTable() {
           ))}
         </tbody>
       </table>
+       {/* 모달 추가 */}
+      {currentRow && (
+        <EditRoomTypeModal
+          open={modalOpen}
+          initial={{
+            spaceType: currentRow.type,
+            items: currentRow.dataTypes.map((label) => ({
+              id: Math.random().toString(36).slice(2, 9),
+              label,
+              unit: '',
+              thresholds: [
+                { level: '주의', min: '', max: '' },
+                { level: '위험', min: '', max: '' },
+                { level: '응급', min: '', max: '' },
+              ],
+            })),
+          }}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 }
