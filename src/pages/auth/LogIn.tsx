@@ -1,7 +1,28 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Inquiry from '@/components/auth/Inquiry';
-import LogIn from '@/components/auth/LogIn'
+import LogIn from '@/components/auth/LogIn';
+import { logIn } from '@/apis/auth/auth';
+import { useLoginStore } from '@/state/store/loginStore';
+
 
 const LoginPage = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const login = useLoginStore((state) => state.login);
+  const navigate = useNavigate(); 
+
+  const handleLogin = async () => {
+    try {
+      const accessToken = await logIn({ username, password });
+      login(accessToken);
+      console.log('로그인 성공');
+      navigate('/main');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-[var(--white-02)]">
       {/* 로고 */}
@@ -20,12 +41,17 @@ const LoginPage = () => {
 
       {/* 아이디 */}
       <div className="absolute left-1/2 -translate-x-1/2 top-[445px]">
-        <Inquiry label="아이디" />
+        <Inquiry label="아이디" value={username} onChange={setUsername} />
       </div>
 
       {/* 비밀번호 */}
       <div className="absolute left-1/2 -translate-x-1/2 top-[541px]">
-        <Inquiry label="비밀번호" />
+        <Inquiry
+          label="비밀번호"
+          type="password"
+          value={password}
+          onChange={setPassword}
+        />
       </div>
 
       {/* 아이디 기억 체크박스 */}
@@ -42,7 +68,7 @@ const LoginPage = () => {
 
       {/* 로그인 버튼 */}
       <div className="absolute left-1/2 -translate-x-1/2 top-[687px]">
-        <LogIn />
+        <LogIn onClick={handleLogin} />
       </div>
     </div>
   );

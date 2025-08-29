@@ -1,8 +1,12 @@
 import { useState } from 'react';
+import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
+import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
 import { AlertsTable } from '@/components/main/AlertsTable';
 import type { AlertRow } from '@/components/main/AlertsTable';
 
 export default function MainPage() {
+  useSetPageTitle("이상치 조회");
+  useSetActiveNav("search", "abnormal");
   const [rows, setRows] = useState<AlertRow[]>([
     {
       id: '1',

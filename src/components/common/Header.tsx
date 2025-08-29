@@ -1,8 +1,23 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AccountIcon } from "@/assets/icons/AccountIcon";
 import { LogoutIcon } from "@/assets/icons/LogoutIcon";
+import { logOut } from '@/apis/auth/auth'; 
+import { useLoginStore } from '@/state/store/loginStore'; 
 
 const Header = () => {
+   const logout = useLoginStore((state) => state.logout);
+  const navigate = useNavigate();
+
+   const handleLogout = async () => {
+    try {
+      await logOut();        
+      logout();              
+      navigate('/');         
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+  };
+
   return (
     <div className="w-full h-[84px] flex-shrink-0 bg-[var(--white)] flex items-center px-[39px]">
       {/* 왼쪽: 로고 */}
@@ -30,7 +45,9 @@ const Header = () => {
         </div>
 
         {/* 로그아웃 */}
-        <div className="flex items-center">
+        <div 
+        onClick={handleLogout}
+        className="flex items-center">
           <LogoutIcon />
           <span className="ml-[10px] w-[169px] h-[43px] text-[27px] font-medium font-inter text-[var(--black)] leading-normal flex items-center">
             로그아웃
