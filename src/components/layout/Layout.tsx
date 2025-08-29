@@ -19,7 +19,7 @@ export default function Layout() {
       <div className="flex w-full">
         {/* 사이드바 */}
        <Sidebar
-          className="relative z-20"
+          className="relative"
           activeGroupKey={activeNav?.group}
           activeItemKey={activeNav?.item}
           onNavigate={(href, g, i) => {
