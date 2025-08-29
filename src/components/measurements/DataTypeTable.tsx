@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import EditRoomTypeModal from '../modals/EditRoomTypeModal';
 import type { TypeFormValue } from '../modals/CreateRoomTypeModal';
+import ActionButton from '../common/ActionButton';
 
 type DataRow = {
   id: string;
@@ -27,7 +28,6 @@ export default function DataTypeTable() {
   };
 
   const handleSave = (form: TypeFormValue) => {
-    // 저장 로직 예시 (선택 사항)
     console.log("저장된 데이터:", form);
   };
 
@@ -69,11 +69,12 @@ export default function DataTypeTable() {
                 ))}
               </Td>
               <Td className="text-center">
-                <button 
-                className="w-[173.535px] h-[56px] rounded border border-[#7C7C7C] bg-[#FFE9AE] text-[16px] font-semibold"
-                onClick={() => handleDetailClick(r)}>
-                  상세보기
-                </button>
+                <ActionButton
+  variant="view"
+  label="상세보기"
+  onClick={() => handleDetailClick(r)} 
+/>
+
               </Td>
             </tr>
           ))}
