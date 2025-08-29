@@ -19,6 +19,7 @@ export default function Layout() {
       <div className="flex w-full">
         {/* 사이드바 */}
        <Sidebar
+          className="relative z-20"
           activeGroupKey={activeNav?.group}
           activeItemKey={activeNav?.item}
           onNavigate={(href, g, i) => {
@@ -29,7 +30,7 @@ export default function Layout() {
         />
 
         {/* 메인 콘텐츠 */}
-        <main className="flex-1 min-h-[calc(100vh-84px)] overflow-auto p-6">
+        <main className="relative z-0 flex-1 min-h-[calc(100vh-84px)] overflow-auto p-6">
            {/* 페이지 제목 */}
           {pageTitle && (
             <h1

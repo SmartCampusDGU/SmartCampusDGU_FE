@@ -3,6 +3,7 @@ import LogInPage from '@/pages/auth/LogIn';
 import MainPage from '@/pages/main/Main';
 import FacilitiesPage from '@/pages/facilities/Facilities';
 import MeasurementsPage from '@/pages/measurements/Measurements';
+import ReminderPage from '@/pages/reminder/Reminder';
 import DocumentsPage from '@/pages/documents/Documents'
 import { PageTitleProvider } from "@/contexts/PageTitleContext";
 import { ActiveNavProvider } from "@/contexts/ActiveNavContext";
@@ -25,6 +26,8 @@ function AppRouter() {
           <Route path="/facilities" element={<FacilitiesPage />} />
           <Route path="/measurements" element={<MeasurementsPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          {/* 재알람 설정 페이지 */}
+          <Route path="/reminder" element={<ReminderPage />} />
         </Route>
       </Routes>
       </PageTitleProvider>
