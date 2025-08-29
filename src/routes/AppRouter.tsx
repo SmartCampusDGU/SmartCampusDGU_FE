@@ -24,7 +24,7 @@ function AppRouter() {
           <Route path="/main" element={<MainPage />} />
            {/* 시설 관리 페이지 */}
           <Route path="/facilities" element={<FacilitiesPage />} />
-          <Route path="/measurements" element={<MeasurementsPage />} />
+          <Route path="/measurements" element={<MeasurementsPage />}/>
           <Route path="/documents" element={<DocumentsPage />} />
           {/* 재알람 설정 페이지 */}
           <Route path="/reminder" element={<ReminderPage />} />

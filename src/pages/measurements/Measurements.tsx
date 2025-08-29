@@ -1,10 +1,24 @@
+import { useEffect } from "react";
+import { useOutletContext } from "react-router-dom";
 import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
 import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
+import MeasurementsActions from "../../components/measurements/MeasurementsActions";
 import DataTypeTable from '@/components/measurements/DataTypeTable';
+
+type LayoutOutletContext = {
+  setExtraActions: (node: React.ReactNode) => void;
+};
 
 export default function Facilities() {
   useSetPageTitle("공간 유형별 측정 항목 설정");
   useSetActiveNav("sensor", "type-threshold");
+
+   const { setExtraActions } = useOutletContext<LayoutOutletContext>();
+
+  useEffect(() => {
+    setExtraActions(<MeasurementsActions />);
+  }, [setExtraActions]);
+
   return (
     <div className="mx-auto w-full max-w-[1600px] px-6 bg-[var(--white-02)]">
       

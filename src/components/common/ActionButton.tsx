@@ -13,7 +13,7 @@ interface ActionButtonProps {
 const variantClasses: Record<Variant, string> = {
   view: "bg-[#FFE9AE]",
   register: "bg-[#EEFFDB]",
-  delete: "bg-[#EEFFDB]",
+  delete: "bg-[rgba(255, 190, 144, 0.36)]",
 };
 
 export default function ActionButton({
