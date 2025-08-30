@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import Tag from '@/components/facilities/Tag'
+import EditSpaceModal from '../modals/EditSpaceModal';
+import type { SpaceFormValue } from '../modals/CreateSpaceModal';
 
 type SpaceType = '강의실' | '실험실';
 
@@ -40,6 +42,19 @@ export default function SpaceList() {
     () => MOCK.filter((r) => r.type === active),
     [active]
   );
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [currentRow, setCurrentRow] = useState<SpaceRow | null>(null);
+
+  const handleDetailClick = (row: SpaceRow) => {
+    setCurrentRow(row);
+    setEditOpen(true);
+  };
+
+   const handleSave = (form: SpaceFormValue) => {
+    console.log("저장된 공간 정보:", form);
+    setEditOpen(false);
+  };
 
   return (
     <div className="w-full">
@@ -118,6 +133,7 @@ export default function SpaceList() {
                  <button
   className="w-[182px] h-[56px] shrink-0 border border-[#7C7C7C] bg-[#F7FCFF] 
              flex items-center justify-center font-inter text-[20px] font-medium text-black"
+              onClick={() => handleDetailClick(r)}
 >
   상세페이지
 </button>
@@ -135,6 +151,35 @@ export default function SpaceList() {
           </tbody>
         </table>
         </div>
+         {/* 상세 모달 */}
+      {currentRow && (
+        <EditSpaceModal
+          open={editOpen}
+          initial={{
+            roomNo: currentRow.roomNo,
+            spaceType: currentRow.type,
+            items: currentRow.tags.map((t) => ({
+              id: Math.random().toString(36).slice(2, 9),
+              label:
+                t === "temperature"
+                  ? "온도"
+                  : t === "humidity"
+                  ? "습도"
+                  : t === "co2"
+                  ? "CO2"
+                  : "TVOC",
+              unit: "",
+              thresholds: [
+                { level: "주의", min: "", max: "" },
+                { level: "위험", min: "", max: "" },
+                { level: "응급", min: "", max: "" },
+              ],
+            })),
+          }}
+          onClose={() => setEditOpen(false)}
+          onSave={handleSave}
+        />
+      )}
       </div>
   );
 }
