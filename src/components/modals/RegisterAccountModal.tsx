@@ -70,7 +70,7 @@ const RegisterAccountModal: React.FC<RegisterAccountModalProps> = ({ open, onClo
                 <input
                   value={pw}
                   onChange={(e) => setPw(e.target.value)}
-                  type="password"
+                  type="text"
                   placeholder="비밀번호 입력 (영어, 숫자, 특수기호 포함 8~20자)"
                   className="w-full border rounded-md px-3 py-3"
                 />

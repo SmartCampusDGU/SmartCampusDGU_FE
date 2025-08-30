@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { useSetPageTitle } from "@/hooks/common/useSetPageTitle";
 import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
 import RegisterAccountModal from "@/components/modals/RegisterAccountModal";
+import EditAccountModal from "@/components/modals/EditAccountModal";
 
 type Account = { id: string; password: string; role: string; desc: string };
 
@@ -12,10 +13,10 @@ const CARD = "bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border b
 const TITLE = "text-[22px] font-extrabold";
 const HEAD_BASE = "text-[17px] font-bold text-gray-900 py-3";
 const HEAD_L = clsx(HEAD_BASE, "text-left px-6");
-const HEAD_C = clsx(HEAD_BASE, "text-center px-8"); // 중앙 정렬 헤더
+const HEAD_C = clsx(HEAD_BASE, "text-center px-8");
 const ROW = "h-[68px] border-b border-gray-200";
-const CELL_L = "px-6 text-[16px] text-gray-900 text-left";   // 좌측 정렬 셀
-const CELL_C = "px-8 text-[16px] text-gray-900 text-center"; // 중앙 정렬 셀
+const CELL_L = "px-6 text-[16px] text-gray-900 text-left";
+const CELL_C = "px-8 text-[16px] text-gray-900 text-center";
 const BTN = "h-10 px-5 rounded-lg font-semibold shadow-sm border disabled:opacity-50";
 const BTN_SKY = clsx(BTN, "bg-[#CFE8FF] border-[#9AC9F3] hover:brightness-95");
 const BTN_RED = clsx(BTN, "bg-[#FFD1D1] border-[#F2A2A2] hover:brightness-95");
@@ -25,8 +26,8 @@ export default function AdministratorPage() {
   useSetPageTitle("관리자 계정 관리");
   useSetActiveNav("administrator", undefined);
 
-
   const [openRegister, setOpenRegister] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
 
   const [rows, setRows] = useState<Account[]>([
     { id: "admin", password: "aabb11", role: "시설관리팀", desc: "시설관리팀 계정" },
@@ -47,11 +48,17 @@ export default function AdministratorPage() {
   const canEdit = selected.size === 1;
   const canDelete = selected.size >= 1;
 
+  const editRow = useMemo(() => {
+    if (selected.size !== 1) return null;
+    const id = [...selected][0];
+    return rows.find(r => r.id === id) ?? null;
+  }, [selected, rows]);
+
   const onEdit = () => {
     if (!canEdit) return;
-    const targetId = [...selected][0];
-    alert(`[계정 수정] ${targetId} 수정 모달 오픈`);
+    setOpenEdit(true);
   };
+
   const onDelete = () => {
     if (!canDelete) return;
     const ids = [...selected];
@@ -66,7 +73,6 @@ export default function AdministratorPage() {
     [selected.size]
   );
 
- 
   return (
     <>
       <div className="w-full">
@@ -150,9 +156,29 @@ export default function AdministratorPage() {
           open={openRegister}
           onClose={() => setOpenRegister(false)}
           onSuccess={(newAccount) => {
-            setRows((prev) => [...prev, newAccount]);
+            setRows(prev => [...prev, newAccount]);
             setOpenRegister(false);
           }}
+        />
+      )}
+
+      {/* 계정 수정 모달 */}
+      {openEdit && editRow && (
+        <EditAccountModal
+          open={openEdit}
+          onClose={() => setOpenEdit(false)}
+          initial={{ id: editRow.id, role: editRow.role, desc: editRow.desc, password: editRow.password,  }}
+          onSave={(form) => {
+            setRows(prev =>
+              prev.map(r =>
+                r.id === editRow.id
+                  ? { id: r.id, role: form.role, desc: form.desc, password: form.password, }
+                  : r
+              )
+            );
+            setOpenEdit(false);
+          }}
+          // editableId // 필요 시 true로 바꾸면 아이디도 수정 가능
         />
       )}
     </>
