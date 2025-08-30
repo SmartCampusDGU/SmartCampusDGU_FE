@@ -192,7 +192,7 @@ function SpaceFormBody({
                 <div className="col-span-5">
                   <div className="flex items-center gap-2">
                     <button onClick={() => removeItem(it.id)} aria-label="항목 삭제" title="항목 삭제" className="shrink-0 text-gray-500 hover:text-red-600">
-                      <img src="/assets/icons/tabler_trash.png" alt="삭제 아이콘" className="w-5 h-5" />
+                      <img src="/icons/tabler_trash.png" alt="삭제 아이콘" className="w-5 h-5" />
                     </button>
                     <input
                       className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400"
