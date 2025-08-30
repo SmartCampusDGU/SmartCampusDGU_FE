@@ -76,12 +76,7 @@ export default function EditRoomTypeModal({
   const changeThresh  = (id: string, lv: LevelKey, which: "min"|"max", v: string) =>
     setItems((p) => p.map((it) => it.id !== id ? it : ({ ...it, thresholds: it.thresholds.map((t) => t.level===lv? { ...t, [which]: v } : t) })));
 
-  const handleCancel = () => {
-    // 값 되돌리기
-    setSpaceType(initial.spaceType);
-    setItems(initial.items);
-    onClose();
-  };
+
   const handleSave = () => {
     if (!canSave) return;
     onSave({ spaceType: spaceType.trim(), items });
