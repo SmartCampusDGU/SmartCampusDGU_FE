@@ -9,7 +9,7 @@ type LayoutOutletContext = {
   setExtraActions: (node: React.ReactNode) => void;
 };
 
-export default function Facilities() {
+export default function Measurements() {
   useSetPageTitle("공간 유형별 측정 항목 설정");
   useSetActiveNav("sensor", "type-threshold");
 
@@ -17,6 +17,7 @@ export default function Facilities() {
 
   useEffect(() => {
     setExtraActions(<MeasurementsActions />);
+     return () => setExtraActions(null);
   }, [setExtraActions]);
 
   return (
