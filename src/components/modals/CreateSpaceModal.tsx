@@ -1,7 +1,4 @@
-// Space modals (공간 등록/수정)
-// - CreateSpaceModal: 생성용
-
-import  { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "@/components/ui/Button";
 
@@ -13,12 +10,12 @@ type MeasureItem = {
   label: string;
   unit: string;
   thresholds: Threshold[];
-  usePreset?: boolean; // 기본 임계값 사용 여부
+  usePreset?: boolean;
 };
 export type SpaceFormValue = {
-  roomNo: string;            // 호실 번호
-  spaceType: string;         // 공간 유형(강의실/실험실/…)
-  items: MeasureItem[];      // 측정항목
+  roomNo: string;
+  spaceType: string;
+  items: MeasureItem[];
 };
 
 /* ── 상수 & 유틸 ──────────────────────────────────── */
@@ -30,8 +27,7 @@ const EMPTY_LEVELS: Threshold[] = [
 const uid = () => Math.random().toString(36).slice(2, 9);
 const SPACE_TYPES = ["강의실", "실험실", "연구실", "전산실", "사무실"] as const;
 
-// ★ 샘플 프리셋: 공간유형별 기본 임계값(라벨/단위/임계값)
-//   실제 연동 전까지 이 상수만 바꿔서 UI 확인 가능
+// (샘플) 공간유형별 프리셋
 const PRESET_BY_TYPE: Record<string, Array<{ label: string; unit: string; thresholds: Threshold[] }>> = {
   강의실: [
     { label: "온도", unit: "℃", thresholds: [
@@ -57,19 +53,12 @@ const PRESET_BY_TYPE: Record<string, Array<{ label: string; unit: string; thresh
   사무실: [],
 };
 
-function cloneEmptyLevels(): Threshold[] {
-  // 입출력 안전 복제
-  return JSON.parse(JSON.stringify(EMPTY_LEVELS));
-}
-function cloneThresholds(src: Threshold[]): Threshold[] {
-  return JSON.parse(JSON.stringify(src));
-}
-function findPreset(spaceType: string, label: string) {
-  const list = PRESET_BY_TYPE[spaceType] || [];
-  return list.find((x) => x.label === label);
-}
+const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v));
+const cloneEmptyLevels = () => clone(EMPTY_LEVELS);
+const findPreset = (spaceType: string, label: string) =>
+  (PRESET_BY_TYPE[spaceType] || []).find((x) => x.label === label);
 
-/* ── Modal Base(기존과 동일) ─────────────────────── */
+/* ── Modal Base ───────────────────────────────────── */
 function usePortalRoot(id = "modal-root") {
   const ref = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -85,7 +74,7 @@ function usePortalRoot(id = "modal-root") {
 }
 function ModalBase({
   open, onClose, children, ariaLabel,
-}: { open: boolean; onClose: () => void; children: React.ReactNode; ariaLabel?: string; }) {
+}: { open: boolean; onClose: () => void; children: React.ReactNode; ariaLabel?: string }) {
   const root = usePortalRoot();
   useEffect(() => {
     if (!open) return;
@@ -96,25 +85,25 @@ function ModalBase({
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
   }, [open, onClose]);
   if (!open || !root) return null;
+
   return createPortal(
     <div className="fixed inset-0 z-[1000] flex items-center justify-center" aria-modal="true" role="dialog" aria-label={ariaLabel ?? "modal"}>
       <div className="fixed inset-0 bg-black/60" onClick={onClose} />
       <div className="relative z-[1001] w-[920px] h-[80vh]" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
-    </div>, root
+    </div>,
+    root
   );
 }
 
-/* ── 공통 바디 컴포넌트(등록/수정에서 공유) ──────── */
+/* ── 공통 바디 ────────────────────────────────────── */
 function SpaceFormBody({
-  mode,                          // "create" | "edit"
   roomNo, setRoomNo,
   spaceType, setSpaceType,
   items, setItems,
   onClose, onSave,
 }: {
-  mode: "create" | "edit";
   roomNo: string; setRoomNo: (v: string) => void;
   spaceType: string; setSpaceType: (v: string) => void;
   items: MeasureItem[]; setItems: React.Dispatch<React.SetStateAction<MeasureItem[]>>;
@@ -123,77 +112,51 @@ function SpaceFormBody({
   const canSave = useMemo(() => roomNo.trim().length > 0 && spaceType.trim().length > 0, [roomNo, spaceType]);
 
   const addItem = () => {
-    setItems((p) => [
-      ...p,
-      { id: uid(), label: "", unit: "", thresholds: cloneEmptyLevels(), usePreset: false } // 새 항목은 기본 임계값 미사용
-    ]);
+    setItems((p) => [...p, { id: uid(), label: "", unit: "", thresholds: cloneEmptyLevels(), usePreset: false }]);
   };
   const removeItem = (id: string) => setItems((p) => p.filter((it) => it.id !== id));
-  const changeLabel = (id: string, v: string) =>
-    setItems((p) => p.map((it) => it.id === id ? { ...it, label: v } : it));
-  const changeUnit = (id: string, v: string) =>
-    setItems((p) => p.map((it) => it.id === id ? { ...it, unit: v } : it));
+  const changeLabel = (id: string, v: string) => setItems((p) => p.map((it) => it.id === id ? { ...it, label: v } : it));
+  const changeUnit  = (id: string, v: string) => setItems((p) => p.map((it) => it.id === id ? { ...it, unit: v } : it));
   const changeThresh = (id: string, lv: LevelKey, which: "min"|"max", v: string) =>
-    setItems((p) => p.map((it) => it.id !== id ? it : ({
-      ...it,
-      thresholds: it.thresholds.map((t) => t.level === lv ? { ...t, [which]: v } : t),
-    })));
+    setItems((p) => p.map((it) => it.id !== id ? it : ({ ...it, thresholds: it.thresholds.map((t) => t.level === lv ? { ...t, [which]: v } : t) })));
+
   const toggleUsePreset = (id: string, checked: boolean) => {
-  setItems((prev) => prev.map((it) => {
-    if (it.id !== id) return it;
-
-    if (checked && spaceType) {
-      const preset = findPreset(spaceType, it.label);
-      if (preset) {
-        return {
-          ...it,
-          unit: preset.unit,
-          thresholds: cloneThresholds(preset.thresholds),
-          usePreset: true,
-        };
+    setItems((prev) => prev.map((it) => {
+      if (it.id !== id) return it;
+      if (checked && spaceType) {
+        const preset = findPreset(spaceType, it.label);
+        if (preset) {
+          return { ...it, unit: preset.unit, thresholds: clone(preset.thresholds), usePreset: true };
+        }
+        return { ...it, usePreset: false };
       }
-      // ✅ 프리셋이 없으면 강제로 켜지지 않도록 유지
       return { ...it, usePreset: false };
-    }
+    }));
+  };
 
-    // 체크 해제 시에는 항상 수동 편집 가능
-    return { ...it, usePreset: false };
-  }));
-};
-
-
-  // 공간 유형 선택 시: 기존 항목 중 해당 유형 프리셋이 있는 항목은 자동 체크 + 값 채우기
   useEffect(() => {
     if (!spaceType) return;
     setItems((prev) => prev.map((it) => {
       const preset = findPreset(spaceType, it.label);
-      if (preset) {
-        return { ...it, unit: preset.unit, thresholds: cloneThresholds(preset.thresholds), usePreset: true };
-      }
-      // 프리셋이 없으면 기존 상태 유지(새 항목일 수 있음)
-      return it;
+      return preset ? { ...it, unit: preset.unit, thresholds: clone(preset.thresholds), usePreset: true } : it;
     }));
   }, [spaceType, setItems]);
 
   return (
     <div className="h-full w-full rounded-2xl shadow-xl overflow-hidden bg-amber-50">
-      {/* 우상단 닫기 */}
       <div className="absolute right-3 top-3 z-[1]">
         <button onClick={onClose} className="text-xl leading-none px-2" aria-label="닫기" title="닫기">✕</button>
       </div>
 
-      {/* 전체 스크롤 영역 */}
       <div className="h-full overflow-y-auto px-6 pt-6 pb-8">
-        {/* 호실 번호 */}
         <div className="text-lg font-semibold">Nº 강의실 번호</div>
         <input
           className="mt-3 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400"
           value={roomNo}
           onChange={(e) => setRoomNo(e.target.value)}
-          placeholder="새로 등록할 강의실 번호 숫자를 입력해주세요"
+          placeholder="강의실 번호를 입력하세요"
         />
 
-        {/* 공간 유형 버튼 그룹 */}
         <div className="mt-6">
           <div className="text-lg font-semibold">공간 유형</div>
           <div className="mt-3 flex flex-wrap gap-5">
@@ -216,19 +179,16 @@ function SpaceFormBody({
           </div>
         </div>
 
-        {/* 헤더 */}
         <div className="grid grid-cols-12 gap-4 mt-6 mb-3 text-gray-700">
           <div className="col-span-5 font-semibold">측정 항목</div>
           <div className="col-span-7 font-semibold">임계값</div>
         </div>
 
-        {/* 항목 리스트 */}
         <div className="space-y-4">
           {items.map((it) => {
             const isPreset = !!it.usePreset;
             return (
               <div key={it.id} className="grid grid-cols-12 gap-4 items-start">
-                {/* 좌측: 항목명 + [프리셋 사용] 체크 */}
                 <div className="col-span-5">
                   <div className="flex items-center gap-2">
                     <button onClick={() => removeItem(it.id)} aria-label="항목 삭제" title="항목 삭제" className="shrink-0 text-gray-500 hover:text-red-600">
@@ -241,17 +201,12 @@ function SpaceFormBody({
                       placeholder="예: 온도, CO₂, 습도"
                     />
                     <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
-                      <input
-                        type="checkbox"
-                        checked={!!it.usePreset}
-                        onChange={(e) => toggleUsePreset(it.id, e.target.checked)}
-                      />
+                      <input type="checkbox" checked={!!it.usePreset} onChange={(e) => toggleUsePreset(it.id, e.target.checked)} />
                       <span>기본값</span>
                     </label>
                   </div>
                 </div>
 
-                {/* 우측: 임계값 카드 */}
                 <div className="col-span-7 space-y-3">
                   {(["주의","위험","응급"] as LevelKey[]).map((lv) => {
                     const t = it.thresholds.find((x) => x.level === lv)!;
@@ -292,14 +247,12 @@ function SpaceFormBody({
           })}
         </div>
 
-        {/* 항목 추가 */}
         <div className="mt-6 flex justify-center">
           <button onClick={addItem} className="w-[420px] rounded-xl border border-amber-300 bg-white px-6 py-3 text-amber-700 hover:bg-amber-100">
             항목 추가하기
           </button>
         </div>
 
-        {/* 저장 */}
         <div className={`mt-8 flex justify-center ${canSave ? "" : "opacity-50 pointer-events-none"}`}>
           <Button variant="save" onClick={onSave} />
         </div>
@@ -308,8 +261,8 @@ function SpaceFormBody({
   );
 }
 
-/* ── CreateSpaceModal (등록) ─────────────────────── */
-export function CreateSpaceModal({
+/* ── CreateSpaceModal ─────────────────────────────── */
+export default function CreateSpaceModal({
   open, onClose, onSave,
 }: {
   open: boolean;
@@ -322,9 +275,9 @@ export function CreateSpaceModal({
     { id: uid(), label: "온도", unit: "", thresholds: cloneEmptyLevels(), usePreset: false },
   ]);
 
+  // 열릴 때마다 빈값으로 초기화
   useEffect(() => {
     if (!open) return;
-    // 열릴 때 매번 초기화 (필요 시 수정)
     setRoomNo("");
     setSpaceType("");
     setItems([{ id: uid(), label: "온도", unit: "", thresholds: cloneEmptyLevels(), usePreset: false }]);
@@ -338,47 +291,6 @@ export function CreateSpaceModal({
   return (
     <ModalBase open={open} onClose={onClose} ariaLabel="공간 등록">
       <SpaceFormBody
-        mode="create"
-        roomNo={roomNo} setRoomNo={setRoomNo}
-        spaceType={spaceType} setSpaceType={setSpaceType}
-        items={items} setItems={setItems}
-        onClose={onClose}
-        onSave={handleSave}
-      />
-    </ModalBase>
-  );
-}
-
-/* ── EditSpaceModal (조회/수정) ──────────────────── */
-export function EditSpaceModal({
-  open, initial, onClose, onSave,
-}: {
-  open: boolean;
-  initial: SpaceFormValue;
-  onClose: () => void;
-  onSave: (v: SpaceFormValue) => void;
-}) {
-  const [roomNo, setRoomNo] = useState(initial.roomNo);
-  const [spaceType, setSpaceType] = useState(initial.spaceType);
-  const [items, setItems] = useState<MeasureItem[]>(initial.items);
-
-  useEffect(() => {
-    if (!open) return;
-    // 모달 열릴 때마다 최신 initial 반영
-    setRoomNo(initial.roomNo);
-    setSpaceType(initial.spaceType);
-    setItems(initial.items);
-  }, [open, initial]);
-
-  const handleSave = () => {
-    onSave({ roomNo: roomNo.trim(), spaceType: spaceType.trim(), items });
-    onClose();
-  };
-
-  return (
-    <ModalBase open={open} onClose={onClose} ariaLabel="공간 수정">
-      <SpaceFormBody
-        mode="edit"
         roomNo={roomNo} setRoomNo={setRoomNo}
         spaceType={spaceType} setSpaceType={setSpaceType}
         items={items} setItems={setItems}
