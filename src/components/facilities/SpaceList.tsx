@@ -3,6 +3,7 @@ import Tag from '@/components/facilities/Tag'
 import ActionButton from "@/components/common/ActionButton";
 import EditSpaceModal from '../modals/EditSpaceModal';
 import type { SpaceFormValue } from '../modals/CreateSpaceModal';
+import { Td, Th } from '../common/Table';
 
 type SpaceType = '강의실' | '실험실';
 
@@ -178,47 +179,5 @@ export default function SpaceList() {
         />
       )}
       </div>
-  );
-}
-
-function Th({
-  className,
-  children,
-  ...rest
-}: React.ThHTMLAttributes<HTMLTableCellElement>) {
-  return (
-    <th
-      className={
-        [
-          'h-[42px] text-center text-[14px] font-semibold text-black',
-          'border-b border-[#ACACAC] bg-white',
-          'px-3',
-          className,
-        ].filter(Boolean).join(' ')
-      }
-      {...rest}
-    >
-      {children}
-    </th>
-  );
-}
-
-function Td({
-  className,
-  children,
-  ...rest
-}: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return (
-    <td
-      className={
-        [
-          'h-[52px] align-middle text-[14px] text-black px-3',
-          className,
-        ].filter(Boolean).join(' ')
-      }
-      {...rest}
-    >
-      {children}
-    </td>
   );
 }
