@@ -1,6 +1,6 @@
 import type { RoomTypeItem } from "./RoomTypeItemType";
 
-export interface GetRoomTypesResponse {
+export interface GetRoomTypesResponseData {
   code: number;
   message: string;
   data: RoomTypeItem[];

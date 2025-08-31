@@ -1,16 +1,13 @@
 import { axiosInstance } from '../axios';
-import type {
-  CreateRoomTypeRequest,
-  RoomTypeResponse,
-  DeleteRoomTypeResponse,
-  GetRoomTypesResponse,
-} from '@/types/rooms/RoomType';
-
+import type { CreateRoomTypeRequestData } from '@/types/facilities/CreateRoomTypeRequestType'
+import type { GetRoomTypesResponseData } from '@/types/facilities/GetRoomTypesResponseType';
+import type { RoomTypeResponseData } from '@/types/facilities/RoomTypeResponseType';
+import type { DeleteRoomTypeResponseData } from '@/types/facilities/DeleteRoomTypeResponseType';
 /**
  * 방 타입 목록 조회
  */
-export const getRoomTypes = async (): Promise<GetRoomTypesResponse> => {
-  const response = await axiosInstance.get<GetRoomTypesResponse>('/api/rooms/types');
+export const getRoomTypes = async (): Promise<GetRoomTypesResponseData> => {
+  const response = await axiosInstance.get<GetRoomTypesResponseData>('/api/rooms/types');
   return response.data;
 };
 
@@ -18,9 +15,9 @@ export const getRoomTypes = async (): Promise<GetRoomTypesResponse> => {
  * 방 타입 생성
  */
 export const createRoomType = async (
-  data: CreateRoomTypeRequest
-): Promise<RoomTypeResponse> => {
-  const response = await axiosInstance.post<RoomTypeResponse>('/api/rooms/types', data);
+  data: CreateRoomTypeRequestData
+): Promise<RoomTypeResponseData> => {
+  const response = await axiosInstance.post<RoomTypeResponseData>('/api/rooms/types', data);
   return response.data;
 };
 
@@ -29,9 +26,9 @@ export const createRoomType = async (
  */
 export const updateRoomType = async (
   roomTypeId: number,
-  data: CreateRoomTypeRequest
-): Promise<RoomTypeResponse> => {
-  const response = await axiosInstance.patch<RoomTypeResponse>(`/api/rooms/types/${roomTypeId}`, data);
+  data: CreateRoomTypeRequestData
+): Promise<RoomTypeResponseData> => {
+  const response = await axiosInstance.patch<RoomTypeResponseData>(`/api/rooms/types/${roomTypeId}`, data);
   return response.data;
 };
 
@@ -40,7 +37,7 @@ export const updateRoomType = async (
  */
 export const deleteRoomType = async (
   roomTypeId: number
-): Promise<DeleteRoomTypeResponse> => {
-  const response = await axiosInstance.delete<DeleteRoomTypeResponse>(`/api/rooms/types/${roomTypeId}`);
+): Promise<DeleteRoomTypeResponseData> => {
+  const response = await axiosInstance.delete<DeleteRoomTypeResponseData>(`/api/rooms/types/${roomTypeId}`);
   return response.data;
 };
