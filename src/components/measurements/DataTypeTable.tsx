@@ -2,6 +2,7 @@ import { useState } from 'react';
 import EditRoomTypeModal from '../modals/EditRoomTypeModal';
 import type { TypeFormValue } from '../modals/CreateRoomTypeModal';
 import ActionButton from '../common/ActionButton';
+import { Td, Th } from '../common/Table';
 
 type DataRow = {
   id: string;
@@ -102,46 +103,5 @@ export default function DataTypeTable() {
         />
       )}
     </div>
-  );
-}
-
-function Th({
-  className,
-  children,
-  ...rest
-}: React.ThHTMLAttributes<HTMLTableCellElement>) {
-  return (
-    <th
-      className={[
-        'h-[42px] text-center text-[14px] font-semibold text-black',
-        'border-b border-[#ACACAC] bg-white px-3',
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      {...rest}
-    >
-      {children}
-    </th>
-  );
-}
-
-function Td({
-  className,
-  children,
-  ...rest
-}: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return (
-    <td
-      className={[
-        'h-[52px] align-middle text-[14px] text-black px-3',
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      {...rest}
-    >
-      {children}
-    </td>
   );
 }
