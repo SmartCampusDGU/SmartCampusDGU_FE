@@ -1,8 +1,8 @@
 import { axiosInstance } from '../axios';
-import type { CreateRoomTypeRequestData } from '@/types/facilities/CreateRoomTypeRequestType'
-import type { GetRoomTypesResponseData } from '@/types/facilities/GetRoomTypesResponseType';
-import type { RoomTypeResponseData } from '@/types/facilities/RoomTypeResponseType';
-import type { DeleteRoomTypeResponseData } from '@/types/facilities/DeleteRoomTypeResponseType';
+import type { CreateRoomTypeRequestData } from '@/types/measurements/CreateRoomTypeRequestType'
+import type { GetRoomTypesResponseData } from '@/types/measurements/GetRoomTypesResponseType';
+import type { RoomTypeResponseData } from '@/types/measurements/RoomTypeResponseType';
+import type { DeleteRoomTypeResponseData } from '@/types/measurements/DeleteRoomTypeResponseType';
 /**
  * 방 타입 목록 조회
  */
