@@ -1,6 +1,6 @@
 import clsx from "clsx"; 
 
-type Variant = "view" | "register" | "delete";
+type Variant = "view" | "register" | "delete"| "tab-active" | "tab-inactive";
 
 interface ActionButtonProps {
   label: string;
@@ -14,6 +14,8 @@ const variantClasses: Record<Variant, string> = {
   view: "bg-[#FFE9AE]",
   register: "bg-[#EEFFDB]",
   delete: "bg-[rgba(255, 190, 144, 0.36)]",
+  "tab-active": "bg-[#FFE9AE] text-[27px] font-extrabold",   // 탭 선택됨
+  "tab-inactive": "bg-[#D9D9D9] text-[27px] font-extrabold", // 탭 비활성
 };
 
 export default function ActionButton({

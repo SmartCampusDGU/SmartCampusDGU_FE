@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import Tag from '@/components/facilities/Tag'
+import ActionButton from "@/components/common/ActionButton";
 import EditSpaceModal from '../modals/EditSpaceModal';
 import type { SpaceFormValue } from '../modals/CreateSpaceModal';
 
@@ -63,18 +64,16 @@ export default function SpaceList() {
         <h2 className="text-[20px] font-bold">공간 리스트</h2>
       {/* 탭 영역 */}
       <div className="flex gap-[52px]">
-        <TabButton
-          active={active === '강의실'}
-          onClick={() => setActive('강의실')}
-        >
-          강의실
-        </TabButton>
-        <TabButton
-          active={active === '실험실'}
-          onClick={() => setActive('실험실')}
-        >
-          실험실
-        </TabButton>
+        <ActionButton
+            variant={active === "강의실" ? "tab-active" : "tab-inactive"}
+            label="강의실"
+            onClick={() => setActive("강의실")}
+          />
+          <ActionButton
+            variant={active === "실험실" ? "tab-active" : "tab-inactive"}
+            label="실험실"
+            onClick={() => setActive("실험실")}
+          />
       </div>
        </div>
 
@@ -130,13 +129,11 @@ export default function SpaceList() {
                   </div>
                 </Td>
                 <Td className="text-right">
-                 <button
-  className="w-[182px] h-[56px] shrink-0 border border-[#7C7C7C] bg-[#F7FCFF] 
-             flex items-center justify-center font-inter text-[20px] font-medium text-black"
-              onClick={() => handleDetailClick(r)}
->
-  상세페이지
-</button>
+                <ActionButton
+                    variant="view"
+                    label="상세페이지"
+                    onClick={() => handleDetailClick(r)}
+                  />
                 </Td>
               </tr>
             ))}
@@ -181,33 +178,6 @@ export default function SpaceList() {
         />
       )}
       </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={
-        active
-          ? 'w-[182px] h-[56px] shrink-0 border border-[#7C7C7C] bg-[#FFE9AE] text-black font-semibold'
-          : 'w-[182px] h-[56px] shrink-0 border border-[#7C7C7C] bg-[#D9D9D9] text-black'
-      }
-    >
-      <span
-        className="text-center font-inter text-[27px] font-extrabold leading-normal text-black"
-      >
-        {children}
-      </span>
-    </button>
   );
 }
 
