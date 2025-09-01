@@ -5,6 +5,7 @@ import { useSetPageTitle } from "@/hooks/common/useSetPageTitle";
 import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
 import RegisterAccountModal from "@/components/modals/RegisterAccountModal";
 import EditAccountModal from "@/components/modals/EditAccountModal";
+import { DeleteModal } from "@/components/modals/DeleteModal"; 
 
 type Account = { id: string; password: string; role: string; desc: string };
 
@@ -12,10 +13,10 @@ type Account = { id: string; password: string; role: string; desc: string };
 const CARD = "bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-gray-200";
 const TITLE = "text-[22px] font-extrabold";
 const HEAD_BASE = "text-[17px] font-bold text-gray-900 py-3";
-const HEAD_L = clsx(HEAD_BASE, "text-left px-6");
+const HEAD_L = clsx(HEAD_BASE, "text-center px-6");
 const HEAD_C = clsx(HEAD_BASE, "text-center px-8");
 const ROW = "h-[68px] border-b border-gray-200";
-const CELL_L = "px-6 text-[16px] text-gray-900 text-left";
+const CELL_L = "px-6 text-[16px] text-gray-900 text-center";
 const CELL_C = "px-8 text-[16px] text-gray-900 text-center";
 const BTN = "h-10 px-5 rounded-lg font-semibold shadow-sm border disabled:opacity-50";
 const BTN_SKY = clsx(BTN, "bg-[#CFE8FF] border-[#9AC9F3] hover:brightness-95");
@@ -28,6 +29,7 @@ export default function AdministratorPage() {
 
   const [openRegister, setOpenRegister] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false); //  삭제 모달
 
   const [rows, setRows] = useState<Account[]>([
     { id: "admin", password: "aabb11", role: "시설관리팀", desc: "시설관리팀 계정" },
@@ -58,20 +60,25 @@ export default function AdministratorPage() {
     if (!canEdit) return;
     setOpenEdit(true);
   };
-
   const onDelete = () => {
     if (!canDelete) return;
-    const ids = [...selected];
-    if (confirm(`${ids.length}개의 계정을 삭제할까요?`)) {
-      setRows(prev => prev.filter(r => !selected.has(r.id)));
-      setSelected(new Set());
-    }
+    setOpenDelete(true); 
   };
 
   const selectionLabel = useMemo(
     () => (selected.size ? `선택됨: ${selected.size}개` : "선택된 항목 없음"),
     [selected.size]
   );
+
+  //  모달용 도우미
+  const selectedIds = useMemo(() => [...selected], [selected]);
+  const sampleIds = useMemo(() => selectedIds.slice(0, 5), [selectedIds]);
+  const deleteMessage = useMemo(() => {
+    const n = selectedIds.length;
+    if (n === 0) return "";
+    if (n === 1) return `정말 '${selectedIds[0]}' 계정을 삭제하시겠습니까?`;
+    return `정말 '${selectedIds[0]}' 외 ${n - 1}개 계정을 삭제하시겠습니까?`;
+  }, [selectedIds]);
 
   return (
     <>
@@ -81,9 +88,15 @@ export default function AdministratorPage() {
           <div className="flex items-center justify-between">
             <h2 className={TITLE}>계정 목록</h2>
             <div className="flex items-center gap-3">
-              <button type="button" className={BTN_SKY} onClick={() => setOpenRegister(true)}>계정 등록</button>
-              <button type="button" className={BTN_RED} onClick={onDelete} disabled={!canDelete}>계정 삭제</button>
-              <button type="button" className={BTN_YEL} onClick={onEdit} disabled={!canEdit}>계정 수정</button>
+              <button type="button" className={BTN_SKY} onClick={() => setOpenRegister(true)}>
+                계정 등록
+              </button>
+              <button type="button" className={BTN_RED} onClick={onDelete} disabled={!canDelete}>
+                계정 삭제
+              </button>
+              <button type="button" className={BTN_YEL} onClick={onEdit} disabled={!canEdit}>
+                계정 수정
+              </button>
             </div>
           </div>
 
@@ -150,7 +163,7 @@ export default function AdministratorPage() {
         </section>
       </div>
 
-      {/* 계정 등록 모달 */}
+      {/*  계정 등록 모달 */}
       {openRegister && (
         <RegisterAccountModal
           open={openRegister}
@@ -162,17 +175,22 @@ export default function AdministratorPage() {
         />
       )}
 
-      {/* 계정 수정 모달 */}
+      {/*  계정 수정 모달 */}
       {openEdit && editRow && (
         <EditAccountModal
           open={openEdit}
           onClose={() => setOpenEdit(false)}
-          initial={{ id: editRow.id, role: editRow.role, desc: editRow.desc, password: editRow.password,  }}
+          initial={{
+            id: editRow.id,
+            role: editRow.role,
+            desc: editRow.desc,
+            password: editRow.password,
+          }}
           onSave={(form) => {
             setRows(prev =>
               prev.map(r =>
                 r.id === editRow.id
-                  ? { id: r.id, role: form.role, desc: form.desc, password: form.password, }
+                  ? { id: r.id, role: form.role, desc: form.desc, password: form.password }
                   : r
               )
             );
@@ -180,6 +198,55 @@ export default function AdministratorPage() {
           }}
           // editableId // 필요 시 true로 바꾸면 아이디도 수정 가능
         />
+      )}
+
+      {/* 계정 삭제 모달 (기본 DeleteModal 재사용) */}
+      {openDelete && (
+        <DeleteModal
+          open={openDelete}
+          title="계정 삭제"
+          confirmText="삭제하기"
+          cancelText="취소"
+          onClose={() => setOpenDelete(false)}
+          onConfirm={() => {
+            setRows(prev => prev.filter(r => !selected.has(r.id)));
+            setSelected(new Set());
+            setOpenDelete(false);
+          }}
+        >
+          <div className="space-y-2 text-center">
+            <p className="text-base">{deleteMessage}</p>
+
+            {/* 선택 개수 요약 */}
+            <p className="text-sm text-gray-600">
+              삭제 대상: 총 <b>{selectedIds.length}</b>개
+            </p>
+
+            {/* 아이디 미리보기 */}
+            {sampleIds.length > 0 && (
+              <div className="text-sm">
+                <div className="mb-1 text-gray-600">삭제 예정 아이디</div>
+                <ul className="list-none  space-y-0.5">
+                  {sampleIds.map((id) => (
+                    <li key={id}>
+                      <code className="px-1 py-0.5 bg-gray-100 rounded">{id}</code>
+                    </li>
+                  ))}
+                </ul>
+                {selectedIds.length > sampleIds.length && (
+                  <div className="mt-1 text-gray-600">
+                    … 외 {selectedIds.length - sampleIds.length}개
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 경고 문구 */}
+            <p className="pt-1 text-[#B42318] text-sm">
+              삭제 후에는 되돌릴 수 없습니다.
+            </p>
+          </div>
+        </DeleteModal>
       )}
     </>
   );

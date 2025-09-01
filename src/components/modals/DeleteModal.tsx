@@ -5,18 +5,10 @@ import { createPortal } from "react-dom";
 
 // ---------- Modal Root (for portals) ----------
 function usePortalRoot(id = "modal-root") {
-  const rootRef = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    let el = document.getElementById(id);
-    if (!el) {
-      el = document.createElement("div");
-      el.setAttribute("id", id);
-      document.body.appendChild(el);
-    }
-    rootRef.current = el;
-  }, [id]);
-  return rootRef.current;
+  if (typeof document === "undefined") return null;
+  return document.getElementById(id);
 }
+
 
 // ---------- Modal Component ----------
 export interface ModalProps {
