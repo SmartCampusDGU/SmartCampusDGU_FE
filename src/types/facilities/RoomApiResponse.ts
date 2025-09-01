@@ -1,4 +1,4 @@
-export interface RoomApiResponseData<T> {
+export interface RoomApiResponse<T> {
   code: number;
   message: string;
   data: T;
