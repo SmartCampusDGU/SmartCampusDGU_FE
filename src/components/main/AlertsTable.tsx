@@ -16,18 +16,6 @@ export interface AlertRow {
   actor?: string;      // 조치자명
 }
 
-/** 색상/텍스트 매핑 */
-// const SEVERITY_TEXT: Record<Severity, string> = {
-//   emergency: '응급',
-//   warning: '위험',
-//   caution: '주의',
-// };
-// const SEVERITY_DOT: Record<Severity, string> = {
-//   emergency: 'bg-[#E53935]',
-//   warning: 'bg-[#FB8C00]',
-//   caution: 'bg-[#FBC02D]',
-// };
-
 /** 작은 구성요소들 */
 function SeverityCell({ severity }: { severity: Severity }) {
   const fill =
