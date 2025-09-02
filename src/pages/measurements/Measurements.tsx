@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
 import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
@@ -13,10 +13,11 @@ export default function Measurements() {
   useSetPageTitle("공간 유형별 측정 항목 설정");
   useSetActiveNav("sensor", "type-threshold");
 
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
    const { setExtraActions } = useOutletContext<LayoutOutletContext>();
 
   useEffect(() => {
-    setExtraActions(<MeasurementsActions />);
+    setExtraActions(<MeasurementsActions selectedIds={selectedIds}/>);
      return () => setExtraActions(null);
   }, [setExtraActions]);
 
@@ -25,7 +26,7 @@ export default function Measurements() {
       
       {/* 공간 리스트 */}
       <div className="mt-6">
-        <DataTypeTable />
+        <DataTypeTable selectedIds={selectedIds} onSelectChange={setSelectedIds}/>
       </div>
     </div>
   );

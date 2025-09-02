@@ -4,12 +4,14 @@ import CreateRoomTypeModal from "@/components/modals/CreateRoomTypeModal";
 import { DeleteTypeModal } from "@/components/modals/DeleteTypeModal";
 import type { TypeFormValue } from "@/components/modals/EditRoomTypeModal";
 import { useCreateRoomTypeMutation } from "@/state/mutations/measurements/useCreateRoomTypeMutation";
+import { useDeleteRoomTypeMutation } from "@/state/mutations/measurements/useDeleteRoomTypeMutation";
 
-export default function MeasurementsActions() {
+export default function MeasurementsActions({ selectedIds }: { selectedIds: number[] }) {
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const createRoomTypeMutation = useCreateRoomTypeMutation();
+  const deleteRoomTypeMutation = useDeleteRoomTypeMutation();
 
     const handleCreateSave = (form: TypeFormValue) => {
     const request = {
@@ -36,9 +38,10 @@ export default function MeasurementsActions() {
     });
   };
 
-  const handleDeleteConfirm = () => {
-    console.log("삭제 확인됨");
-    setDeleteOpen(false);
+    const handleDeleteConfirm = () => {
+    selectedIds.forEach((id) => {
+      deleteRoomTypeMutation.mutate(id);
+    });
   };
 
   return (
