@@ -6,8 +6,10 @@ import type { DeleteRoomTypeResponse } from '@/types/measurements/DeleteRoomType
 /**
  * 방 타입 목록 조회
  */
-export const getRoomTypes = async (): Promise<GetRoomTypesResponse> => {
-  const response = await axiosInstance.get<GetRoomTypesResponse>('/api/rooms/types');
+export const getRoomTypes = async (page=0, size=20): Promise<GetRoomTypesResponse> => {
+  const params: Record<string, any> = { page, size };
+  const response = await axiosInstance.get<GetRoomTypesResponse>('/api/rooms/types', {
+    params });
   return response.data;
 };
 
