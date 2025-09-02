@@ -1,7 +1,7 @@
-import type { PageInfo } from "./PageInfo";
+import type { PageResponse } from "../common/PageResponse";
 import type { RoomListItem } from "./RoomListItem";
 
 export interface GetRoomsResponse {
-  page: PageInfo;
+  page: PageResponse;
   rooms: RoomListItem[];
 }
