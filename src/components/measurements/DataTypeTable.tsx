@@ -5,6 +5,7 @@ import ActionButton from '../common/ActionButton';
 import { Td, Th } from '../common/Table';
 import { useRoomTypesQuery } from '@/state/queries/measurements/useRoomTypesQuery';
 import type { RoomTypeItem } from '@/types/measurements/RoomTypeItem';
+import { useUpdateRoomTypeMutation } from '@/state/mutations/measurements/useUpdateRoomTypeMutation';
 
 interface DataTypeTableProps {
   selectedIds: number[];
@@ -16,6 +17,7 @@ export default function DataTypeTable({
   onSelectChange,
 }: DataTypeTableProps) {
   const { data: roomTypes = [] } = useRoomTypesQuery();
+  const updateRoomTypeMutation = useUpdateRoomTypeMutation();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [currentRow, setCurrentRow] = useState<RoomTypeItem | null>(null);
@@ -25,8 +27,34 @@ export default function DataTypeTable({
     setModalOpen(true);
   };
 
-  const handleSave = (form: TypeFormValue) => {
-    console.log("저장된 데이터:", form);
+   const handleSave = (form: TypeFormValue) => {
+    if (!currentRow) return;
+
+    const request = {
+      name: form.spaceType,
+      description: "",
+      dataTypes: form.items.map((item) => ({
+        id: Number(item.id) || 0,
+        cautionMin: Number(item.thresholds[0].min || 0),
+        cautionMax: Number(item.thresholds[0].max || 0),
+        dangerMin: Number(item.thresholds[1].min || 0),
+        dangerMax: Number(item.thresholds[1].max || 0),
+        emergencyMin: Number(item.thresholds[2].min || 0),
+        emergencyMax: Number(item.thresholds[2].max || 0),
+      })),
+    };
+
+    updateRoomTypeMutation.mutate(
+      { roomTypeId: currentRow.id, data: request },
+      {
+        onSuccess: () => {
+          setModalOpen(false);
+        },
+        onError: (err) => {
+          console.error("공간 유형 수정 실패:", err);
+        },
+      }
+    );
   };
 
   const toggleSelect = (id: number) => {
