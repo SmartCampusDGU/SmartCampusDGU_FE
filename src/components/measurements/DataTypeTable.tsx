@@ -3,27 +3,16 @@ import EditRoomTypeModal from '../modals/EditRoomTypeModal';
 import type { TypeFormValue } from '../modals/CreateRoomTypeModal';
 import ActionButton from '../common/ActionButton';
 import { Td, Th } from '../common/Table';
-
-type DataRow = {
-  id: string;
-  type: string; // 공간 타입
-  dataTypes: string[]; // 수집 데이터 유형
-};
-
-const MOCK: DataRow[] = [
-  { id: '1', type: '강의실', dataTypes: ['온도', '습도'] },
-  { id: '2', type: '연구실', dataTypes: ['온도', 'TVOC'] },
-  { id: '3', type: '전산실', dataTypes: ['온도', '습도'] },
-  { id: '4', type: '사무실', dataTypes: ['온도', '습도'] },
-];
+import { useRoomTypesQuery } from '@/state/queries/measurements/useRoomTypesQuery';
+import type { RoomTypeItem } from '@/types/measurements/RoomTypeItem';
 
 export default function DataTypeTable() {
-  const [rows] = useState<DataRow[]>(MOCK);
+   const { data: roomTypes = [] } = useRoomTypesQuery();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentRow, setCurrentRow] = useState<DataRow | null>(null);
+  const [currentRow, setCurrentRow] = useState<RoomTypeItem | null>(null);
 
-  const handleDetailClick = (row: DataRow) => {
+  const handleDetailClick = (row: RoomTypeItem) => {
     setCurrentRow(row);
     setModalOpen(true);
   };
@@ -50,22 +39,20 @@ export default function DataTypeTable() {
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
+          {roomTypes.map((r) => (
             <tr key={r.id} className="border-b border-[#E5E5E5]">
               <Td className="text-center">
                 <input type="checkbox" className="w-4 h-4" />
               </Td>
-              <Td className="text-center">{r.type}</Td>
+              <Td className="text-center">{r.name}</Td>
               <Td className="text-center">
                 {r.dataTypes.map((d, idx) => (
                   <span
-                    key={idx}
-                    className={`${
-                      d === 'TVOC' ? 'font-bold text-black' : 'font-normal'
-                    }`}
-                  >
-                    {d}
-                    {idx < r.dataTypes.length - 1 && ', '}
+                      key={d.id}
+                      className={`${d.name === 'TVOC' ? 'font-bold text-black' : 'font-normal'}`}
+                    >
+                    {d.name}
+                      {idx < r.dataTypes.length - 1 && ', '}
                   </span>
                 ))}
               </Td>
@@ -86,15 +73,15 @@ export default function DataTypeTable() {
         <EditRoomTypeModal
           open={modalOpen}
           initial={{
-            spaceType: currentRow.type,
-            items: currentRow.dataTypes.map((label) => ({
-              id: Math.random().toString(36).slice(2, 9),
-              label,
-              unit: '',
+            spaceType: currentRow.name,
+            items: currentRow.dataTypes.map((dt) => ({
+              id: dt.id.toString(),
+              label: dt.name,
+              unit: dt.unit,
               thresholds: [
-                { level: '주의', min: '', max: '' },
-                { level: '위험', min: '', max: '' },
-                { level: '응급', min: '', max: '' },
+                { level: '주의', min: dt.cautionMin.toString(), max: dt.cautionMax.toString() },
+                { level: '위험', min: dt.dangerMin.toString(), max: dt.dangerMax.toString() },
+                { level: '응급', min: dt.emergencyMin.toString(), max: dt.emergencyMax.toString() },
               ],
             })),
           }}
