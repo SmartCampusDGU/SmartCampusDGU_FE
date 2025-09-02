@@ -4,21 +4,22 @@ import ActionButton from "@/components/common/ActionButton";
 import EditSpaceModal from '../modals/EditSpaceModal';
 import type { SpaceFormValue } from '../modals/CreateSpaceModal';
 import { Td, Th } from '../common/Table';
-import type { SpaceType, SpaceRow } from '@/mocks/facilities/spaces';
-import { mockSpaces } from '@/mocks/facilities/spaces';
+import type { SpaceType } from '@/mocks/facilities/spaces';
+import { useRoomsQuery } from '@/state/queries/facilities/useRoomsQuery';
+import type { RoomListItem } from '@/types/facilities/RoomListItem';
 
 export default function SpaceList() {
+  const { data: roomList = [] } = useRoomsQuery();
   const [active, setActive] = useState<SpaceType>('실험실'); // 기본 탭
 
-  const rows = useMemo(
-    () => mockSpaces.filter((r) => r.type === active),
-    [active]
-  );
+  const rows = useMemo(() => {
+  return roomList.filter((room) => room.roomType === active);
+}, [roomList, active]);
 
   const [editOpen, setEditOpen] = useState(false);
-  const [currentRow, setCurrentRow] = useState<SpaceRow | null>(null);
+  const [currentRow, setCurrentRow] = useState<RoomListItem | null>(null);
 
-  const handleDetailClick = (row: SpaceRow) => {
+  const handleDetailClick = (row: RoomListItem) => {
     setCurrentRow(row);
     setEditOpen(true);
   };
@@ -71,31 +72,23 @@ export default function SpaceList() {
                 <Td className="text-center">
                   <input type="checkbox" className="w-4 h-4" />
                 </Td>
-                <Td className="text-center">{r.roomNo}</Td>
+                <Td className="text-center">{r.roomNumber}</Td>
                 <Td className="text-center">
                   <div className="flex justify-center items-center gap-2 py-2">
-                    {r.tags.map((t, idx) => (
-                      <Tag
-                        key={`${r.id}-${t}-${idx}`}
-                        label={
-                          t === 'temperature'
-                            ? '온도'
-                            : t === 'humidity'
-                            ? '습도'
-                            : t === 'co2'
-                            ? 'CO2'
-                            : 'TVOC'
-                        }
-                        variant={
-                          t === 'temperature'
-                            ? 'temperature'
-                            : t === 'humidity'
-                            ? 'humidity'
-                            : t === 'co2'
-                            ? 'co2'
-                            : 'tvoc'
-                        }
-                      />
+                    {r.dataTypes.map((t, idx) => (
+<Tag
+        key={`${r.id}-${t.name}-${idx}`}
+        label={t.name}
+        variant={
+          t.name === '온도'
+            ? 'temperature'
+            : t.name === '습도'
+            ? 'humidity'
+            : t.name === 'CO2'
+            ? 'co2'
+            : 'tvoc'
+        }
+      />
                     ))}
                   </div>
                 </Td>
@@ -124,24 +117,29 @@ export default function SpaceList() {
         <EditSpaceModal
           open={editOpen}
           initial={{
-            roomNo: currentRow.roomNo,
-            spaceType: currentRow.type,
-            items: currentRow.tags.map((t) => ({
-              id: Math.random().toString(36).slice(2, 9),
-              label:
-                t === "temperature"
-                  ? "온도"
-                  : t === "humidity"
-                  ? "습도"
-                  : t === "co2"
-                  ? "CO2"
-                  : "TVOC",
-              unit: "",
-              thresholds: [
-                { level: "주의", min: "", max: "" },
-                { level: "위험", min: "", max: "" },
-                { level: "응급", min: "", max: "" },
-              ],
+            roomNo: currentRow.roomNumber,
+            spaceType: currentRow.roomType,
+            items: currentRow.dataTypes.map((dataType) => ({
+               id: dataType.dataTypeId.toString(), 
+        label: dataType.name,               
+        unit: dataType.unit,
+        thresholds: [
+          {
+            level: "주의",
+            min: dataType.cautionMin.toString(),
+            max: dataType.cautionMax.toString(),
+          },
+          {
+            level: "위험",
+            min: dataType.dangerMin.toString(),
+            max: dataType.dangerMax.toString(),
+          },
+          {
+            level: "응급",
+            min: dataType.emergencyMin.toString(),
+            max: dataType.emergencyMax.toString(),
+          },
+        ],
             })),
           }}
           onClose={() => setEditOpen(false)}
