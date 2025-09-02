@@ -1,4 +1,4 @@
-export interface PageInfo {
+export interface PageResponse {
   size: number;
   totalElements: number;
   currentElements: number;
