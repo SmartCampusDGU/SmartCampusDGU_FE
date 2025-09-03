@@ -1,23 +1,29 @@
 import { axiosInstance } from '../axios';
 import type { RoomApiResponse } from '@/types/facilities/RoomApiResponse';
+import type { GetRoomsResponse } from '@/types/facilities/GetRoomResponse';
 import type { CreateRoomRequest } from '@/types/facilities/CreateRoomRequest';
 import type { UpdateRoomRequest } from '@/types/facilities/UpdateRoomRequest';
 import type { RoomDetail } from '@/types/facilities/RoomDetail';
-import type { RoomListItem } from '@/types/facilities/RoomListItem';
 
 /**
  * 방 목록 조회 (roomType 옵션)
  */
-export const getRooms = async (roomTypeId?: number,
+export const getRooms = async (
+  roomTypeId?: number,
   page = 0,
-  size = 20): Promise<RoomApiResponse<RoomListItem[]>> => {
-     const params: Record<string, any> = { page, size };
+  size = 20
+): Promise<RoomApiResponse<GetRoomsResponse>> => {
+  const params: Record<string, any> = { page, size };
+
   if (roomTypeId !== undefined) {
     params.roomType = roomTypeId;
   }
 
-  const response = await axiosInstance.get<RoomApiResponse<RoomListItem[]>>('/api/rooms', {
-    params });
+  const response = await axiosInstance.get<RoomApiResponse<GetRoomsResponse>>(
+    '/api/rooms',
+    { params }
+  );
+
   return response.data;
 };
 
