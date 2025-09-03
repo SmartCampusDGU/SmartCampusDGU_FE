@@ -9,7 +9,8 @@ import { useRoomsQuery } from '@/state/queries/facilities/useRoomsQuery';
 import type { RoomListItem } from '@/types/facilities/RoomListItem';
 
 export default function SpaceList() {
-  const { data: roomList = [] } = useRoomsQuery();
+  const { data } = useRoomsQuery();
+  const roomList = data?.rooms ?? [];
   const [active, setActive] = useState<SpaceType>('실험실'); // 기본 탭
 
   const rows = useMemo(() => {
