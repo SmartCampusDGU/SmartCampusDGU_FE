@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getOutliers } from "@/apis/main/outliers";
+import type { GetOutliersRequest } from "@/types/main/GetOutliersRequest";
 import type { GetOutliersResponse } from "@/types/main/GetOutliersResponse";
 import { alertMockData } from "@/mocks/main/alerts";
 
@@ -8,13 +9,7 @@ export const OUTLIERS_QUERY_KEY = ["outliers"];
 interface UseOutliersQueryParams {
   page?: number;
   size?: number;
-  searchRequest?: {
-    level?: string;
-    checkStatus?: string;
-    roomId?: number;
-    startDate?: string;
-    endDate?: string;
-  };
+  searchRequest?: GetOutliersRequest; 
 }
 
 export const useOutliersQuery = ({

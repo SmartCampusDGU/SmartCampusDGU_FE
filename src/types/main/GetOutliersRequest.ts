@@ -4,6 +4,4 @@ export interface GetOutliersRequest {
   roomId?: number;
   startDate?: string; // ISO string
   endDate?: string;   // ISO string
-  page?: number;
-  size?: number;
 }
