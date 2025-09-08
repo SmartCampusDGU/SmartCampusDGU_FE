@@ -1,5 +1,6 @@
 import React from 'react';
 import ActionStatusSelect from './ActionStatusSelect';
+import { useUpdateOutlierStatusMutation } from "@/state/mutations/main/useUpdateOutlierStatusMutation";
 import type { AlertRowView } from '@/utils/main/outlierMapper';
 
 /** 데이터 타입 */
@@ -47,6 +48,8 @@ export function AlertsTable({
   rows: AlertRowView[];
   onChangeAction?: (id: number, action: AlertRowView["action"]) => void;
 }) {
+  const updateMutation = useUpdateOutlierStatusMutation();
+
   return (
     <div className="w-full overflow-x-auto">
       <table className="min-w-[920px] w-full border-collapse border border-[#ACACAC] bg-white">
@@ -68,7 +71,24 @@ export function AlertsTable({
               <Td className="p-0">
                 <ActionStatusSelect
                   value={r.action}
-                  onChange={(a) => onChangeAction?.(r.id, a)}
+                  onChange={(a) => {
+                    // UI 업데이트
+                    onChangeAction?.(r.id, a);
+
+                    // API 호출
+                    updateMutation.mutate({
+                      outlierLogId: r.id,
+                      data: {
+                        checkStatus: "CONFIRMED", // or derive from r.checkStatus
+                        actionStatus:
+                          a === "none"
+                            ? "NONE"
+                            : a === "in-progress"
+                            ? "IN_PROGRESS"
+                            : "DONE",
+                      },
+                    });
+                  }}
                 />
               </Td>
               <Td>{r.occurredAt}</Td>
