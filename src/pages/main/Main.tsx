@@ -1,20 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
 import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
 import { AlertsTable } from '@/components/main/AlertsTable';
 import type { AlertRowView } from '@/utils/main/outlierMapper';
 import { toAlertRowView } from '@/utils/main/outlierMapper';
-import { alertMockData } from '@/mocks/main/alerts';
+import { useOutliersQuery } from '@/state/queries/main/useOutliersQuery';
 
 export default function MainPage() {
   useSetPageTitle("이상치 조회");
   useSetActiveNav("search", "abnormal");
 
-  const initialRows: AlertRowView[] = alertMockData
-    .map(toAlertRowView)
-    .filter((v): v is AlertRowView => v !== null);
+  const { data } = useOutliersQuery({ page: 0, size: 20 });
 
-  const [rows, setRows] = useState<AlertRowView[]>(initialRows);
+  const [rows, setRows] = useState<AlertRowView[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      const mapped = data.outlierLogs
+        .map(toAlertRowView)
+        .filter((v): v is AlertRowView => v !== null);
+      setRows(mapped);
+    }
+  }, [data]);
 
   return (
     <div className="min-h-screen bg-[var(--white-02)] p-6">
