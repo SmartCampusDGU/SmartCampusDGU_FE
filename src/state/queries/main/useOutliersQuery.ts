@@ -18,14 +18,14 @@ export const useOutliersQuery = ({
   searchRequest,
 }: UseOutliersQueryParams = {}) => {
   // 항상 24시간 범위 계산
-  const now = new Date();
-  const defaultEndDate = now.toISOString();
-  const defaultStartDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+  // const now = new Date();
+  // const defaultEndDate = now.toISOString();
+  // const defaultStartDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
 
   const finalSearchRequest: GetOutliersRequest = {
     ...searchRequest,
-    startDate: searchRequest?.startDate ?? defaultStartDate,
-    endDate: searchRequest?.endDate ?? defaultEndDate,
+    // startDate: searchRequest?.startDate ?? defaultStartDate,
+    // endDate: searchRequest?.endDate ?? defaultEndDate,
   };
 
   return useQuery({
