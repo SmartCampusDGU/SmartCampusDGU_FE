@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { deleteSensor } from '@/api/sensors';
+import { deleteSensor } from '@/apis/sensors/sensors';
 import type { DeleteSensorBody, DeleteSensorPath } from '@/types/sensors/DeleteSensorRequest';
 import type { DeleteSensorResponse } from '@/types/sensors/DeleteSensorResponse';
 
