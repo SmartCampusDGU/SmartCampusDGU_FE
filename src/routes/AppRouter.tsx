@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LogInPage from '@/pages/auth/LogIn';
 import MainPage from '@/pages/main/Main';
 import FacilitiesPage from '@/pages/facilities/Facilities';
+import SensorsPage from '@/pages/sensors/Sensors';
 import MeasurementsPage from '@/pages/measurements/Measurements';
 import ReminderPage from '@/pages/reminder/Reminder';
 import DocumentsPage from '@/pages/documents/Documents'
@@ -26,7 +27,11 @@ function AppRouter() {
           <Route path="/main" element={<MainPage />} />
            {/* 시설 관리 페이지 */}
           <Route path="/facilities" element={<FacilitiesPage />} />
+          {/* 센서 관리 페이지 */}
+          <Route path="/sensors" element={<SensorsPage />} />
+          {/* 유형별 센서 설정 페이지 */}
           <Route path="/measurements" element={<MeasurementsPage />}/>
+          {/* 문서 작업 페이지 */}
           <Route path="/documents" element={<DocumentsPage />} />
           {/* 재알람 설정 페이지 */}
           <Route path="/reminder" element={<ReminderPage />} />

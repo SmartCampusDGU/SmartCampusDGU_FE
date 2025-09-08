@@ -33,13 +33,13 @@ export const NAV_GROUPS: NavGroup[] = [
     key: 'sensor',
     label: '센서 관리',
     items: [
-      { key: 'sensor-setting', label: '센서 설정' },
+      { key: 'sensor-setting', label: '센서 설정', href: "/sensors" },
       { key: 'type-threshold', label: '유형별 센서 설정', href: "/measurements" },
       { key: 'reminder', label: '재알람 설정', href: "/reminder" },
     ],
   },
-  { key: 'doc', label: '문서 작업', href: "/documents" },                    // ← items 없음 (대메뉴 단독)
-  { key: 'administrator', label: '관리자 계정 관리', href: "/administrator" }, // ← items 없음 (대메뉴 단독)
+  { key: 'doc', label: '문서 작업', href: "/documents" },                    
+  { key: 'administrator', label: '관리자 계정 관리', href: "/administrator" }, 
 ]
 
 export default function Sidebar({
