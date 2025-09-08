@@ -1,0 +1,28 @@
+import { useQuery } from "@tanstack/react-query";
+import { getOutliers } from "@/apis/main/outliers";
+import type { GetOutliersResponse } from "@/types/main/GetOutliersResponse";
+
+export const OUTLIERS_QUERY_KEY = ["outliers"];
+
+interface UseOutliersQueryParams {
+  page?: number;
+  size?: number;
+  searchRequest?: {
+    level?: string;
+    checkStatus?: string;
+    roomId?: number;
+    startDate?: string;
+    endDate?: string;
+  };
+}
+
+export const useOutliersQuery = ({ page = 0, size = 20, searchRequest }: UseOutliersQueryParams) => {
+  return useQuery({
+    queryKey: [...OUTLIERS_QUERY_KEY, page, size, searchRequest],
+    queryFn: async () => {
+      const res: GetOutliersResponse = await getOutliers(page, size, searchRequest);
+      return res.data;
+    },
+    staleTime: 1000 * 60,
+  });
+};

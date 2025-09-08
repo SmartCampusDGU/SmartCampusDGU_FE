@@ -1,5 +1,4 @@
 import { axiosInstance } from '../axios';
-import type { GetOutliersRequest } from '@/types/main/GetOutliersRequest';
 import type { GetOutliersResponse } from '@/types/main/GetOutliersResponse';
 import type { GetOutlierDetailResponse } from '@/types/main/GetOutlierDetailResponse';
 import type { UpdateOutlierStatusRequest } from '@/types/main/UpdateOutlierStatusRequest';
@@ -9,9 +8,12 @@ import type { UpdateOutlierStatusResponse } from '@/types/main/UpdateOutlierStat
  * 이상치 목록 조회
  */
 export const getOutliers = async (
-  params: GetOutliersRequest
+  page = 0,
+  size = 20,
+  searchRequest?: Record<string, any>
 ): Promise<GetOutliersResponse> => {
-  const response = await axiosInstance.get<GetOutliersResponse>('/api/outliers', { params });
+  const params = { page, size, ...searchRequest };
+  const response = await axiosInstance.get<GetOutliersResponse>("/api/outliers", { params });
   return response.data;
 };
 
