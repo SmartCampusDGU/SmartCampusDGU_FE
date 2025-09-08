@@ -1,5 +1,5 @@
 // SuccessModal.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
 /** ---- Portal Root ---- */
