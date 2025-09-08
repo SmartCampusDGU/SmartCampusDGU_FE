@@ -1,5 +1,6 @@
 import { axiosInstance } from '../axios';
 import type { GetOutliersResponse } from '@/types/main/GetOutliersResponse';
+import type { GetOutliersRequest } from "@/types/main/GetOutliersRequest";
 import type { GetOutlierDetailResponse } from '@/types/main/GetOutlierDetailResponse';
 import type { UpdateOutlierStatusRequest } from '@/types/main/UpdateOutlierStatusRequest';
 import type { UpdateOutlierStatusResponse } from '@/types/main/UpdateOutlierStatusResponse';
@@ -10,7 +11,7 @@ import type { UpdateOutlierStatusResponse } from '@/types/main/UpdateOutlierStat
 export const getOutliers = async (
   page = 0,
   size = 20,
-  searchRequest?: Record<string, any>
+  searchRequest?: GetOutliersRequest
 ): Promise<GetOutliersResponse> => {
   const params = { page, size, ...searchRequest };
   const response = await axiosInstance.get<GetOutliersResponse>("/api/outliers", { params });
