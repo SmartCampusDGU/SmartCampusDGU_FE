@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { registerSensor } from '@/api/sensors';
+import { registerSensor } from '@/apis/sensors/sensors';
 import type { RegisterSensorRequest } from '@/types/sensors/RegisterSensorRequest';
 import type { RegisterSensorResponse } from '@/types/sensors/RegisterSensorResponse';
 
