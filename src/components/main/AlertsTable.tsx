@@ -1,5 +1,6 @@
 import React from 'react';
 import ActionStatusSelect from './ActionStatusSelect';
+import type { AlertRowView } from '@/utils/main/outlierMapper';
 
 /** 데이터 타입 */
 export type Severity = 'emergency' | 'warning' | 'caution'; // 응급/위험/주의
@@ -43,8 +44,8 @@ export function AlertsTable({
   rows,
   onChangeAction,
 }: {
-  rows: AlertRow[];
-  onChangeAction?: (id: string, action: ActionStatus) => void;
+  rows: AlertRowView[];
+  onChangeAction?: (id: number, action: AlertRowView["action"]) => void;
 }) {
   return (
     <div className="w-full overflow-x-auto">
