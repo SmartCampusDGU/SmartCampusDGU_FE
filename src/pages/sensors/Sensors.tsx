@@ -1,4 +1,3 @@
-// src/pages/sensors/SensorsPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
@@ -6,6 +5,8 @@ import { useSetPageTitle } from "@/hooks/common/useSetPageTitle";
 import ActionButton from "@/components/common/ActionButton";
 import { SuccessModal } from "@/components/modals/SuccessModal";
 import { DeleteTypeModal } from "@/components/modals/DeleteTypeModal";
+import { useRegisterSensorMutation } from "@/state/mutations/sensors/useRegisterSensorMutation";
+import { useDeleteSensorMutation } from "@/state/mutations/sensors/useDeleteSensorMutation";
 
 type LayoutOutletContext = { setExtraActions: (node: React.ReactNode) => void };
 type Mode = "register" | "delete";
@@ -90,17 +91,37 @@ function SensorRegisterForm({
 }) {
   const [roomNo, setRoomNo] = useState("");
   const [serial, setSerial] = useState("");
+  const [apiError, setApiError] = useState("");
 
-  // 간단한 유효성 검사
+  const { mutateAsync, isPending } = useRegisterSensorMutation({
+    onError: (e: any) => {
+      const msg =
+        e?.response?.data?.message ||
+        e?.message ||
+        "센서 등록 중 오류가 발생했습니다.";
+      setApiError(msg);
+    },
+  });
+
   const errors = {
     roomNo: !roomNo.trim() ? "강의실 번호를 입력해주세요." : "",
     serial: !serial.trim() ? "센서 식별 번호(Serial No)를 입력해주세요." : "",
   };
   const isValid = !errors.roomNo && !errors.serial;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid) return; // 유효하지 않으면 모달 막기
+    setApiError("");
+    if (!isValid) return;
+
+    // !! 문제 부분
+    const roomId = Number(roomNo);
+    if (Number.isNaN(roomId)) {
+      setApiError("강의실 번호는 숫자여야 합니다.");
+      return;
+    }
+
+    await mutateAsync({ roomId, macAddress: serial });
     onOpenSuccess("센서 등록이 완료되었습니다!");
     setRoomNo("");
     setSerial("");
@@ -122,7 +143,8 @@ function SensorRegisterForm({
         onChange={setSerial}
         error={errors.serial}
       />
-      <Submit label="등록하기" disabled={!isValid} />
+      {apiError && <p className="text-sm text-red-600">{apiError}</p>}
+      <Submit label={isPending ? "등록 중..." : "등록하기"} disabled={!isValid || isPending} />
     </form>
   );
 }
@@ -136,27 +158,51 @@ function SensorDeleteForm({
   const [roomNo, setRoomNo] = useState("");
   const [serial, setSerial] = useState("");
   const [reason, setReason] = useState("");
+  const [apiError, setApiError] = useState("");
 
-  // 삭제 확인 모달 열림 상태
+  // 삭제 확인 모달
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const { mutateAsync, isPending } = useDeleteSensorMutation({
+    onError: (e: any) => {
+      const msg =
+        e?.response?.data?.message ||
+        e?.message ||
+        "센서 삭제 중 오류가 발생했습니다.";
+      setApiError(msg);
+    },
+  });
 
   const errors = {
     roomNo: !roomNo.trim() ? "강의실 번호를 입력해주세요." : "",
     serial: !serial.trim() ? "센서 식별 번호(Serial No)를 입력해주세요." : "",
-
   };
   const isValid = !errors.roomNo && !errors.serial;
 
   // 삭제 버튼 클릭 시: 먼저 검증 → 확인 모달 열기
   const handleOpenConfirm = (e: React.FormEvent) => {
     e.preventDefault();
+    setApiError("");
     if (!isValid) return;
     setConfirmOpen(true);
   };
 
-
-  const handleConfirmDelete = () => {
+  // 확인 모달에서 실제 API 호출
+  const handleConfirmDelete = async () => {
     setConfirmOpen(false);
+    setApiError("");
+
+    // !! 문제부분
+    const sensorId = Number(serial);
+    if (Number.isNaN(sensorId)) {
+      setApiError("개발수정사항");
+      return;
+    }
+
+    await mutateAsync({
+      path: { sensorId },
+      body: { deleteReason: reason || "미입력" },
+    });
 
     onOpenSuccess("센서 삭제가 완료되었습니다!");
     setRoomNo("");
@@ -187,7 +233,8 @@ function SensorDeleteForm({
           value={reason}
           onChange={setReason}
         />
-        <Submit label="삭제하기" disabled={!isValid} />
+        {apiError && <p className="text-sm text-red-600">{apiError}</p>}
+        <Submit label={isPending ? "삭제 중..." : "삭제하기"} disabled={!isValid || isPending} />
       </form>
 
       {/* 삭제 확인 모달 */}
