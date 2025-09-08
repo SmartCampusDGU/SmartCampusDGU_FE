@@ -16,12 +16,23 @@ export const useOutliersQuery = ({
   page = 0,
   size = 20,
   searchRequest,
-}: UseOutliersQueryParams) => {
+}: UseOutliersQueryParams = {}) => {
+  // 항상 24시간 범위 계산
+  const now = new Date();
+  const defaultEndDate = now.toISOString();
+  const defaultStartDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+
+  const finalSearchRequest: GetOutliersRequest = {
+    ...searchRequest,
+    startDate: searchRequest?.startDate ?? defaultStartDate,
+    endDate: searchRequest?.endDate ?? defaultEndDate,
+  };
+
   return useQuery({
-    queryKey: [...OUTLIERS_QUERY_KEY, page, size, searchRequest],
+    queryKey: [...OUTLIERS_QUERY_KEY, page, size, finalSearchRequest],
     queryFn: async () => {
-      const res: GetOutliersResponse = await getOutliers(page, size, searchRequest);
-      const { page: outlierLogs } = res.data;
+      const res: GetOutliersResponse = await getOutliers(page, size, finalSearchRequest);
+      const { outlierLogs } = res.data;
 
       if (!Array.isArray(outlierLogs) || outlierLogs.length === 0) {
         return {
@@ -35,7 +46,7 @@ export const useOutliersQuery = ({
             hasPreviousPage: false,
             isLast: true,
           },
-          outlierLogs: alertMockData, 
+          outlierLogs: alertMockData,
         };
       }
 
