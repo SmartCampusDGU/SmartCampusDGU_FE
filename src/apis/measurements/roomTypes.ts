@@ -30,7 +30,7 @@ export const updateRoomType = async (
   roomTypeId: number,
   data: CreateRoomTypeRequest
 ): Promise<RoomTypeResponseData> => {
-  const response = await axiosInstance.patch<RoomTypeResponseData>(`/api/rooms/types/${roomTypeId}`, data);
+  const response = await axiosInstance.put<RoomTypeResponseData>(`/api/rooms/types/${roomTypeId}`, data);
   return response.data;
 };
 
