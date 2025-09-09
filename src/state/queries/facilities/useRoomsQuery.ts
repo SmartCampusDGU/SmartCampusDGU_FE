@@ -11,7 +11,8 @@ export const useRoomsQuery = ({ roomType, page = 0, size = 20, }: GetRoomsReques
    queryKey: [...ROOMS_QUERY_KEY, roomType ?? "all", page, size],
     queryFn: async () => {
       const res = await getRooms({ roomType, page, size }); 
-      const rooms = res.data;
+      const data = res.data;
+      const rooms = data.rooms;
 
       if (!Array.isArray(rooms) || rooms.length === 0) {
         return {
