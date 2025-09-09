@@ -1,11 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { getRooms } from '@/apis/facilities/rooms';
+import type { GetRoomsRequest } from '@/types/facilities/GetRoomsRequest';
 import type { GetRoomsResponse } from '@/types/facilities/GetRoomResponse';
 import { convertMockSpacesToRoomListItems } from '@/utils/facilities/mockConverter';
 
-export const useRoomsQuery = () => {
+export const ROOMS_QUERY_KEY = ["rooms"];
+
+export const useRoomsQuery = ({ roomTypeId, page = 0, size = 20, }: GetRoomsRequest = {}) => {
   return useQuery<GetRoomsResponse>({
-    queryKey: ['rooms'],
+   queryKey: [...ROOMS_QUERY_KEY, roomTypeId ?? "all", page, size],
     queryFn: async () => {
       const res = await getRooms(); 
       const rooms = res.data;

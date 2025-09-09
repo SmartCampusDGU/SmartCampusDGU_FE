@@ -9,30 +9,34 @@ import type { RoomListItem } from '@/types/facilities/RoomListItem';
 import { useRoomTypesQuery } from '@/state/queries/measurements/useRoomTypesQuery';
 
 export default function SpaceList() {
-  const { data } = useRoomsQuery();
-  const roomList = data?.rooms ?? [];
-
-  // 방 타입 목록 (탭)
+  // 방 타입 목록(탭)
   const { data: roomTypes = [] } = useRoomTypesQuery();
 
-  // 활성 탭: roomTypeId 사용
+  // 활성 탭: roomTypeId 사용 (선택값)
   const [activeRoomTypeId, setActiveRoomTypeId] = useState<number | null>(null);
 
+  // 첫 로드 시 첫 번째 타입 자동 선택
   useEffect(() => {
     if (roomTypes.length > 0 && activeRoomTypeId == null) {
-      setActiveRoomTypeId(roomTypes[0].id); // 첫 번째 타입을 기본 선택
+      setActiveRoomTypeId(roomTypes[0].id);
     }
   }, [roomTypes, activeRoomTypeId]);
+
+  // 쿼리 파라미터: roomTypeId는 선택
+  const roomsQueryParams =
+    activeRoomTypeId != null
+      ? { page: 0, size: 20, roomTypeId: activeRoomTypeId }
+      : { page: 0, size: 20 };
+
+  const { data } = useRoomsQuery(roomsQueryParams);
+  const roomList = data?.rooms ?? [];
 
   const activeRoomTypeName = useMemo(() => {
     return roomTypes.find((rt) => rt.id === activeRoomTypeId)?.name ?? '';
   }, [roomTypes, activeRoomTypeId]);
 
-  // 리스트 필터: 현재 RoomListItem이 roomType(이름 문자열)만 가지고 있다는 전제
-  const rows = useMemo(() => {
-    if (!activeRoomTypeName) return [];
-    return roomList.filter((room) => room.roomType === activeRoomTypeName);
-  }, [roomList, activeRoomTypeName]);
+  // 서버에서 roomTypeId로 필터링해서 내려오므로 그대로 사용
+  const rows = roomList;
 
   const [editOpen, setEditOpen] = useState(false);
   const [currentRow, setCurrentRow] = useState<RoomListItem | null>(null);
@@ -139,7 +143,7 @@ export default function SpaceList() {
           open={editOpen}
           initial={{
             roomNo: currentRow.roomNumber,
-            // 이름 -> id 매핑
+            // 이름 -> id 매핑 (없으면 첫 번째 타입/0으로 대체)
             roomTypeId:
               roomTypes.find((t) => t.name === currentRow.roomType)?.id ??
               (roomTypes[0]?.id ?? 0),

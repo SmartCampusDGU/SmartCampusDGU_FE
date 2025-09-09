@@ -1,5 +1,6 @@
 import { axiosInstance } from '../axios';
 import type { RoomApiResponse } from '@/types/facilities/RoomApiResponse';
+import type { GetRoomsRequest } from '@/types/facilities/GetRoomsRequest';
 import type { GetRoomsResponse } from '@/types/facilities/GetRoomResponse';
 import type { CreateRoomRequest } from '@/types/facilities/CreateRoomRequest';
 import type { UpdateRoomRequest } from '@/types/facilities/UpdateRoomRequest';
@@ -8,11 +9,11 @@ import type { RoomDetail } from '@/types/facilities/RoomDetail';
 /**
  * 방 목록 조회 (roomType 옵션)
  */
-export const getRooms = async (
-  roomTypeId?: number,
+export const getRooms = async ({
+  roomTypeId,
   page = 0,
-  size = 20
-): Promise<RoomApiResponse<GetRoomsResponse>> => {
+  size = 20,
+}: GetRoomsRequest = {}): Promise<RoomApiResponse<GetRoomsResponse>> => {
   const params: Record<string, any> = { page, size };
 
   if (roomTypeId !== undefined) {
