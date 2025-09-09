@@ -12,7 +12,7 @@ export default function SpaceList() {
   // 방 타입 목록(탭)
   const { data: roomTypes = [] } = useRoomTypesQuery();
 
-  // 활성 탭: roomTypeId 사용 (선택값)
+  // 활성 탭: roomType 사용 (선택값)
   const [activeRoomType, setActiveRoomType] = useState<number | null>(null);
 
   // 첫 로드 시 첫 번째 타입 자동 선택
@@ -22,7 +22,7 @@ export default function SpaceList() {
     }
   }, [roomTypes, activeRoomType]);
 
-  // 쿼리 파라미터: roomTypeId는 선택
+  // 쿼리 파라미터: roomType은 선택
   const roomsQueryParams =
     activeRoomType != null
       ? { roomTypeId: activeRoomType, page: 0, size: 20 }

@@ -9,17 +9,7 @@ import type { RoomDetail } from '@/types/facilities/RoomDetail';
 /**
  * 방 목록 조회 (roomType 옵션)
  */
-export const getRooms = async ({
-  roomType,
-  page = 0,
-  size = 20,
-}: GetRoomsRequest = {}): Promise<RoomApiResponse<GetRoomsResponse>> => {
-  const params: Record<string, any> = { roomType, page, size };
-
-  if (roomType !== undefined) {
-    params.roomType = roomType;
-  }
-
+export const getRooms = async (params: GetRoomsRequest = {}): Promise<RoomApiResponse<GetRoomsResponse>> => {
   const response = await axiosInstance.get<RoomApiResponse<GetRoomsResponse>>(
     '/api/rooms',
     { params }
