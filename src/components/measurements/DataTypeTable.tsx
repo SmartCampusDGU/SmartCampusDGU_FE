@@ -7,6 +7,20 @@ import { useRoomTypesQuery } from '@/state/queries/measurements/useRoomTypesQuer
 import type { RoomTypeItem } from '@/types/measurements/RoomTypeItem';
 import { useUpdateRoomTypeMutation } from '@/state/mutations/measurements/useUpdateRoomTypeMutation';
 
+const SENSOR_OPTIONS = [
+  { name: "rssi", unit: "unknown", id: 1 },
+  { name: "aqmScores", unit: "unknown", id: 2 },
+  { name: "usbPowered", unit: "boolean", id: 3 },
+  { name: "temperature", unit: "℃", id: 4 },
+  { name: "humidity", unit: "%", id: 5 },
+  { name: "tvoc", unit: "ug/m³", id: 6 },
+  { name: "ambientNoise", unit: "dBA", id: 7 },
+  { name: "iaqIndex", unit: "index", id: 8 },
+  { name: "batteryPercentage", unit: "%", id: 9 },
+  { name: "missedConnections", unit: "unknown", id: 10 },
+  { name: "buttonPressed", unit: "boolean", id: 11 },
+];
+
 interface DataTypeTableProps {
   selectedIds: number[];
   onSelectChange: (ids: number[]) => void;
@@ -33,15 +47,20 @@ export default function DataTypeTable({
     const request = {
       name: form.spaceType,
       description: "",
-      dataTypes: form.items.map((item) => ({
-        id: Number(item.id) || 0,
-        cautionMin: Number(item.thresholds[0].min || 0),
-        cautionMax: Number(item.thresholds[0].max || 0),
-        dangerMin: Number(item.thresholds[1].min || 0),
-        dangerMax: Number(item.thresholds[1].max || 0),
-        emergencyMin: Number(item.thresholds[2].min || 0),
-        emergencyMax: Number(item.thresholds[2].max || 0),
-      })),
+      dataTypes: form.items.map((item) => {
+  const sensor = SENSOR_OPTIONS.find((s) => s.name === item.label);
+  if (!sensor) throw new Error("Invalid sensor name");
+
+  return {
+    id: sensor.id,
+    cautionMin: Number(item.thresholds[0].min || 0),
+    cautionMax: Number(item.thresholds[0].max || 0),
+    dangerMin: Number(item.thresholds[1].min || 0),
+    dangerMax: Number(item.thresholds[1].max || 0),
+    emergencyMin: Number(item.thresholds[2].min || 0),
+    emergencyMax: Number(item.thresholds[2].max || 0),
+  };
+}),
     };
 
     updateRoomTypeMutation.mutate(
