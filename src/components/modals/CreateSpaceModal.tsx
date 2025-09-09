@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "@/components/ui/Button";
+import { useRoomTypesQuery } from "@/state/queries/measurements/useRoomTypesQuery";
+import type { RoomTypeItem } from "@/types/measurements/RoomTypeItem";
 
 /* ── 타입 ─────────────────────────────────────────── */
 type LevelKey = "주의" | "위험" | "응급";
@@ -12,9 +14,11 @@ type MeasureItem = {
   thresholds: Threshold[];
   usePreset?: boolean;
 };
+
 export type SpaceFormValue = {
   roomNo: string;
-  spaceType: string;
+  roomTypeId: number;
+  spaceTypeName: string; // 표시용 (선택된 방 타입 이름)
   items: MeasureItem[];
 };
 
@@ -24,39 +28,36 @@ const EMPTY_LEVELS: Threshold[] = [
   { level: "위험", min: "", max: "" },
   { level: "응급", min: "", max: "" },
 ];
-const uid = () => Math.random().toString(36).slice(2, 9);
-const SPACE_TYPES = ["강의실", "실험실", "연구실", "전산실", "사무실"] as const;
 
 // (샘플) 공간유형별 프리셋
-const PRESET_BY_TYPE: Record<string, Array<{ label: string; unit: string; thresholds: Threshold[] }>> = {
-  강의실: [
-    { label: "온도", unit: "℃", thresholds: [
-      { level: "주의", min: "0", max: "36" },
-      { level: "위험", min: "36", max: "38" },
-      { level: "응급", min: "38", max: "50" },
-    ]},
-    { label: "CO₂", unit: "ppm", thresholds: [
-      { level: "주의", min: "800",  max: "1200" },
-      { level: "위험", min: "1200", max: "2000" },
-      { level: "응급", min: "2000", max: "5000" },
-    ]},
-  ],
-  실험실: [
-    { label: "온도", unit: "℃", thresholds: [
-      { level: "주의", min: "0",  max: "35" },
-      { level: "위험", min: "35", max: "37" },
-      { level: "응급", min: "37", max: "50" },
-    ]},
-  ],
-  연구실: [],
-  전산실: [],
-  사무실: [],
-};
+// const PRESET_BY_TYPE: Record<string, Array<{ label: string; unit: string; thresholds: Threshold[] }>> = {
+//   강의실: [
+//     { label: "온도", unit: "℃", thresholds: [
+//       { level: "주의", min: "0", max: "36" },
+//       { level: "위험", min: "36", max: "38" },
+//       { level: "응급", min: "38", max: "50" },
+//     ]},
+//     { label: "CO₂", unit: "ppm", thresholds: [
+//       { level: "주의", min: "800",  max: "1200" },
+//       { level: "위험", min: "1200", max: "2000" },
+//       { level: "응급", min: "2000", max: "5000" },
+//     ]},
+//   ],
+//   실험실: [
+//     { label: "온도", unit: "℃", thresholds: [
+//       { level: "주의", min: "0",  max: "35" },
+//       { level: "위험", min: "35", max: "37" },
+//       { level: "응급", min: "37", max: "50" },
+//     ]},
+//   ],
+//   연구실: [],
+//   전산실: [],
+//   사무실: [],
+// };
 
+const uid = () => Math.random().toString(36).slice(2, 9);
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v));
 const cloneEmptyLevels = () => clone(EMPTY_LEVELS);
-const findPreset = (spaceType: string, label: string) =>
-  (PRESET_BY_TYPE[spaceType] || []).find((x) => x.label === label);
 
 /* ── Modal Base ───────────────────────────────────── */
 function usePortalRoot(id = "modal-root") {
@@ -100,16 +101,39 @@ function ModalBase({
 /* ── 공통 바디 ────────────────────────────────────── */
 function SpaceFormBody({
   roomNo, setRoomNo,
-  spaceType, setSpaceType,
+  roomTypeId, setRoomTypeId,
   items, setItems,
   onClose, onSave,
+  roomTypes,
 }: {
   roomNo: string; setRoomNo: (v: string) => void;
-  spaceType: string; setSpaceType: (v: string) => void;
+  roomTypeId: number | null; setRoomTypeId: (v: number) => void;
   items: MeasureItem[]; setItems: React.Dispatch<React.SetStateAction<MeasureItem[]>>;
   onClose: () => void; onSave: () => void;
+  roomTypes: RoomTypeItem[];
 }) {
-  const canSave = useMemo(() => roomNo.trim().length > 0 && spaceType.trim().length > 0, [roomNo, spaceType]);
+  const canSave = useMemo(() => roomNo.trim().length > 0 && !!roomTypeId, [roomNo, roomTypeId]);
+
+  // 선택된 roomType 객체/이름
+  const selectedRoomType = useMemo(
+    () => roomTypes.find(rt => rt.id === roomTypeId) ?? null,
+    [roomTypes, roomTypeId]
+  );
+
+  // 프리셋 조회 함수 (roomType의 dataTypes에서 label(name)매칭)
+  const findPreset = (roomType: RoomTypeItem | null, label: string) => {
+    if (!roomType) return undefined;
+    const dt = roomType.dataTypes.find(d => d.name === label);
+    if (!dt) return undefined;
+    return {
+      unit: dt.unit,
+      thresholds: [
+        { level: "주의",  min: String(dt.cautionMin),  max: String(dt.cautionMax) },
+        { level: "위험",  min: String(dt.dangerMin),   max: String(dt.dangerMax) },
+        { level: "응급",  min: String(dt.emergencyMin),max: String(dt.emergencyMax) },
+      ] as Threshold[],
+    };
+  };
 
   const addItem = () => {
     setItems((p) => [...p, { id: uid(), label: "", unit: "", thresholds: cloneEmptyLevels(), usePreset: false }]);
@@ -123,8 +147,8 @@ function SpaceFormBody({
   const toggleUsePreset = (id: string, checked: boolean) => {
     setItems((prev) => prev.map((it) => {
       if (it.id !== id) return it;
-      if (checked && spaceType) {
-        const preset = findPreset(spaceType, it.label);
+      if (checked && selectedRoomType) {
+        const preset = findPreset(selectedRoomType, it.label);
         if (preset) {
           return { ...it, unit: preset.unit, thresholds: clone(preset.thresholds), usePreset: true };
         }
@@ -134,13 +158,14 @@ function SpaceFormBody({
     }));
   };
 
+  // roomType 변경 시, 프리셋 자동 반영
   useEffect(() => {
-    if (!spaceType) return;
+    if (!selectedRoomType) return;
     setItems((prev) => prev.map((it) => {
-      const preset = findPreset(spaceType, it.label);
+      const preset = findPreset(selectedRoomType, it.label);
       return preset ? { ...it, unit: preset.unit, thresholds: clone(preset.thresholds), usePreset: true } : it;
     }));
-  }, [spaceType, setItems]);
+  }, [selectedRoomType, setItems]);
 
   return (
     <div className="h-full w-full rounded-2xl shadow-xl overflow-hidden bg-amber-50">
@@ -160,19 +185,20 @@ function SpaceFormBody({
         <div className="mt-6">
           <div className="text-lg font-semibold">공간 유형</div>
           <div className="mt-3 flex flex-wrap gap-5">
-            {SPACE_TYPES.map((t) => {
-              const selected = spaceType === t;
+            {roomTypes.map((rt) => {
+              const selected = roomTypeId === rt.id;
               return (
                 <button
-                  key={t}
+                  key={rt.id}
                   type="button"
-                  onClick={() => setSpaceType(t)}
+                  onClick={() => setRoomTypeId(rt.id)}
                   className={[
                     "px-6 py-3 rounded-xl border text-lg font-medium",
                     selected ? "bg-amber-600 border-amber-700 text-white" : "bg-white border-gray-300 text-gray-700",
                   ].join(" ")}
+                  title={rt.description}
                 >
-                  {t}
+                  {rt.name}
                 </button>
               );
             })}
@@ -201,7 +227,11 @@ function SpaceFormBody({
                       placeholder="예: 온도, CO₂, 습도"
                     />
                     <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
-                      <input type="checkbox" checked={!!it.usePreset} onChange={(e) => toggleUsePreset(it.id, e.target.checked)} />
+                      <input
+                        type="checkbox"
+                        checked={!!it.usePreset}
+                        onChange={(e) => toggleUsePreset(it.id, e.target.checked)}
+                      />
                       <span>기본값</span>
                     </label>
                   </div>
@@ -269,8 +299,10 @@ export default function CreateSpaceModal({
   onClose: () => void;
   onSave: (v: SpaceFormValue) => void;
 }) {
+  const { data: roomTypes = [] } = useRoomTypesQuery();
+
   const [roomNo, setRoomNo] = useState("");
-  const [spaceType, setSpaceType] = useState("");
+  const [roomTypeId, setRoomTypeId] = useState<number | null>(null);
   const [items, setItems] = useState<MeasureItem[]>([
     { id: uid(), label: "온도", unit: "", thresholds: cloneEmptyLevels(), usePreset: false },
   ]);
@@ -279,12 +311,18 @@ export default function CreateSpaceModal({
   useEffect(() => {
     if (!open) return;
     setRoomNo("");
-    setSpaceType("");
+    setRoomTypeId(roomTypes[0]?.id ?? null);
     setItems([{ id: uid(), label: "온도", unit: "", thresholds: cloneEmptyLevels(), usePreset: false }]);
-  }, [open]);
+  }, [open, roomTypes]);
 
   const handleSave = () => {
-    onSave({ roomNo: roomNo.trim(), spaceType: spaceType.trim(), items });
+    const rt = roomTypes.find(r => r.id === roomTypeId) ?? null;
+    onSave({
+      roomNo: roomNo.trim(),
+      roomTypeId: roomTypeId ?? 0,
+      spaceTypeName: rt?.name ?? "",
+      items,
+    });
     onClose();
   };
 
@@ -292,10 +330,11 @@ export default function CreateSpaceModal({
     <ModalBase open={open} onClose={onClose} ariaLabel="공간 등록">
       <SpaceFormBody
         roomNo={roomNo} setRoomNo={setRoomNo}
-        spaceType={spaceType} setSpaceType={setSpaceType}
+        roomTypeId={roomTypeId} setRoomTypeId={setRoomTypeId}
         items={items} setItems={setItems}
         onClose={onClose}
         onSave={handleSave}
+        roomTypes={roomTypes}
       />
     </ModalBase>
   );

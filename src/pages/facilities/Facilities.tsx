@@ -1,13 +1,16 @@
+// pages/facilities/index.tsx (예시)
 import { useEffect, useState } from 'react';
 import { useOutletContext } from "react-router-dom";
 import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
 import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
 import ActionButton from "@/components/common/ActionButton";
 import SpaceList from '@/components/facilities/SpaceList'
-import CreateRoomTypeModal from '@/components/modals/CreateSpaceModal';
+import CreateSpaceModal from '@/components/modals/CreateSpaceModal';
 import { useCreateRoomMutation } from '@/state/mutations/facilities/useCreateRoomMutation';
 import type { CreateRoomRequest } from '@/types/facilities/CreateRoomRequest';
-import type { TypeFormValue } from '@/components/modals/CreateRoomTypeModal';
+import type { SpaceFormValue } from '@/components/modals/CreateSpaceModal';
+import { useRoomTypesQuery } from '@/state/queries/measurements/useRoomTypesQuery';
+import type { RoomTypeItem } from '@/types/measurements/RoomTypeItem';
 
 type LayoutOutletContext = {
   setExtraActions: (node: React.ReactNode) => void;
@@ -18,40 +21,45 @@ export default function Facilities() {
   useSetActiveNav("facility", "room-list");
 
   const createRoomMutation = useCreateRoomMutation();
-   const { setExtraActions } = useOutletContext<LayoutOutletContext>();
-   const [modalOpen, setModalOpen] = useState(false);
+  const { data: roomTypes = [] } = useRoomTypesQuery();
 
-  const handleSave = (form: TypeFormValue) => {
-  
-  const roomTypeId = form.spaceType === '강의실' ? 1 : 2; 
+  const { setExtraActions } = useOutletContext<LayoutOutletContext>();
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const request: CreateRoomRequest = {
-    roomNumber: form.spaceType,
-    roomTypeId,
-    dataTypes: form.items.map((item) => ({
-      id: parseInt(item.id, 10) || 0, 
-      cautionMin: Number(item.thresholds[0].min),
-      cautionMax: Number(item.thresholds[0].max),
-      dangerMin: Number(item.thresholds[1].min),
-      dangerMax: Number(item.thresholds[1].max),
-      emergencyMin: Number(item.thresholds[2].min),
-      emergencyMax: Number(item.thresholds[2].max),
-      isModified: true,
-    })),
+  const handleSave = (form: SpaceFormValue) => {
+    // 선택된 roomType
+    const rt: RoomTypeItem | undefined = roomTypes.find(r => r.id === form.roomTypeId);
+    // label -> dataTypeId 매핑
+    const request: CreateRoomRequest = {
+      roomNumber: form.roomNo,          // roomNo로 저장
+      roomTypeId: form.roomTypeId,      // 모달에서 받은 id 사용
+      dataTypes: form.items.map((item) => {
+        const dt = rt?.dataTypes.find(d => d.name === item.label);
+        return {
+          id: dt?.id ?? 0,              // 백엔드가 기대하는 필드가 dataTypeId라면 여기를 맞춰 주세요
+          cautionMin: Number(item.thresholds[0].min),
+          cautionMax: Number(item.thresholds[0].max),
+          dangerMin: Number(item.thresholds[1].min),
+          dangerMax: Number(item.thresholds[1].max),
+          emergencyMin: Number(item.thresholds[2].min),
+          emergencyMax: Number(item.thresholds[2].max),
+          isModified: true,
+        };
+      }),
+    };
+
+    createRoomMutation.mutate(request, {
+      onSuccess: () => {
+        console.log('공간 등록 성공');
+        setModalOpen(false);
+      },
+      onError: (e) => {
+        console.error('공간 등록 실패', e);
+      }
+    });
   };
 
-  createRoomMutation.mutate(request, {
-    onSuccess: () => {
-      console.log('공간 등록 성공');
-      setModalOpen(false);
-    },
-    onError: (e) => {
-      console.error('공간 등록 실패', e);
-    }
-  });
-};
-
-    useEffect(() => {
+  useEffect(() => {
     setExtraActions(
       <ActionButton
         variant="register"
@@ -69,7 +77,7 @@ export default function Facilities() {
         <SpaceList />
       </div>
       {/* 모달 */}
-      <CreateRoomTypeModal
+      <CreateSpaceModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
