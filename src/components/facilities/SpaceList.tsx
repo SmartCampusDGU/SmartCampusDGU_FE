@@ -13,27 +13,27 @@ export default function SpaceList() {
   const { data: roomTypes = [] } = useRoomTypesQuery();
 
   // 활성 탭: roomTypeId 사용 (선택값)
-  const [activeRoomTypeId, setActiveRoomTypeId] = useState<number | null>(null);
+  const [activeRoomType, setActiveRoomType] = useState<number | null>(null);
 
   // 첫 로드 시 첫 번째 타입 자동 선택
   useEffect(() => {
-    if (roomTypes.length > 0 && activeRoomTypeId == null) {
-      setActiveRoomTypeId(roomTypes[0].id);
+    if (roomTypes.length > 0 && activeRoomType == null) {
+      setActiveRoomType(roomTypes[0].id);
     }
-  }, [roomTypes, activeRoomTypeId]);
+  }, [roomTypes, activeRoomType]);
 
   // 쿼리 파라미터: roomTypeId는 선택
   const roomsQueryParams =
-    activeRoomTypeId != null
-      ? { page: 0, size: 20, roomTypeId: activeRoomTypeId }
+    activeRoomType != null
+      ? { roomTypeId: activeRoomType, page: 0, size: 20 }
       : { page: 0, size: 20 };
 
   const { data } = useRoomsQuery(roomsQueryParams);
   const roomList = data?.rooms ?? [];
 
   const activeRoomTypeName = useMemo(() => {
-    return roomTypes.find((rt) => rt.id === activeRoomTypeId)?.name ?? '';
-  }, [roomTypes, activeRoomTypeId]);
+    return roomTypes.find((rt) => rt.id === activeRoomType)?.name ?? '';
+  }, [roomTypes, activeRoomType]);
 
   // 서버에서 roomTypeId로 필터링해서 내려오므로 그대로 사용
   const rows = roomList;
@@ -71,9 +71,9 @@ export default function SpaceList() {
           {roomTypes.map((rt) => (
             <ActionButton
               key={rt.id}
-              variant={activeRoomTypeId === rt.id ? "tab-active" : "tab-inactive"}
+              variant={activeRoomType === rt.id ? "tab-active" : "tab-inactive"}
               label={rt.name}
-              onClick={() => setActiveRoomTypeId(rt.id)}
+              onClick={() => setActiveRoomType(rt.id)}
             />
           ))}
         </div>

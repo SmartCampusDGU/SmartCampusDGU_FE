@@ -1,5 +1,5 @@
 export interface GetRoomsRequest {
-    roomTypeId?: number;
+    roomType?: number;
     page?: number;
     size?: number;
 }

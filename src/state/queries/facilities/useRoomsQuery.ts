@@ -6,9 +6,9 @@ import { convertMockSpacesToRoomListItems } from '@/utils/facilities/mockConvert
 
 export const ROOMS_QUERY_KEY = ["rooms"];
 
-export const useRoomsQuery = ({ roomTypeId, page = 0, size = 20, }: GetRoomsRequest = {}) => {
+export const useRoomsQuery = ({ roomType, page = 0, size = 20, }: GetRoomsRequest = {}) => {
   return useQuery<GetRoomsResponse>({
-   queryKey: [...ROOMS_QUERY_KEY, roomTypeId ?? "all", page, size],
+   queryKey: [...ROOMS_QUERY_KEY, roomType ?? "all", page, size],
     queryFn: async () => {
       const res = await getRooms(); 
       const rooms = res.data;
