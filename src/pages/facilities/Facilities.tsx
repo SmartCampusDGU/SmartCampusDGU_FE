@@ -1,4 +1,3 @@
-// pages/facilities/index.tsx (예시)
 import { useEffect, useState } from 'react';
 import { useOutletContext } from "react-router-dom";
 import { useSetPageTitle } from '@/hooks/common/useSetPageTitle';
