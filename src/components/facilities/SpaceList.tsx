@@ -25,7 +25,7 @@ export default function SpaceList() {
   // 쿼리 파라미터: roomType은 선택
   const roomsQueryParams =
     activeRoomType != null
-      ? { roomTypeId: activeRoomType, page: 0, size: 20 }
+      ? { roomType: activeRoomType, page: 0, size: 20 }
       : { page: 0, size: 20 };
 
   const { data } = useRoomsQuery(roomsQueryParams);
@@ -35,7 +35,7 @@ export default function SpaceList() {
     return roomTypes.find((rt) => rt.id === activeRoomType)?.name ?? '';
   }, [roomTypes, activeRoomType]);
 
-  // 서버에서 roomTypeId로 필터링해서 내려오므로 그대로 사용
+  // 서버에서 roomType 필터링해서 내려오므로 그대로 사용
   const rows = roomList;
 
   const [editOpen, setEditOpen] = useState(false);
