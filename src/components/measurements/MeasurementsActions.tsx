@@ -58,10 +58,17 @@ export default function MeasurementsActions({ selectedIds }: { selectedIds: numb
   };
 
     const handleDeleteConfirm = () => {
-    selectedIds.forEach((id) => {
-      deleteRoomTypeMutation.mutate(id);
-    });
-  };
+  if (selectedIds.length === 0) return;
+
+  deleteRoomTypeMutation.mutate(selectedIds[0], {
+    onSuccess: () => {
+      setDeleteOpen(false);
+    },
+    onError: (err) => {
+      console.error("삭제 실패:", err);
+    }
+  });
+};
 
   return (
     <>

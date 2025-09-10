@@ -77,12 +77,12 @@ export default function DataTypeTable({
   };
 
   const toggleSelect = (id: number) => {
-    if (selectedIds.includes(id)) {
-      onSelectChange(selectedIds.filter((x) => x !== id));
-    } else {
-      onSelectChange([...selectedIds, id]);
-    }
-  };
+  if (selectedIds.includes(id)) {
+    onSelectChange([]);
+  } else {
+    onSelectChange([id]); 
+  }
+};
 
   return (
     <div className="w-full border-t border-[#ACACAC]">
