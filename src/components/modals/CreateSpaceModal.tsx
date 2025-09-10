@@ -28,6 +28,20 @@ const EMPTY_LEVELS: Threshold[] = [
   { level: "응급", min: "", max: "" },
 ];
 
+const SENSOR_OPTIONS = [
+  { name: "rssi", unit: "unknown", id: 1 },
+  { name: "aqmScores", unit: "unknown", id: 2 },
+  { name: "usbPowered", unit: "boolean", id: 3 },
+  { name: "temperature", unit: "℃", id: 4 },
+  { name: "humidity", unit: "%", id: 5 },
+  { name: "tvoc", unit: "ug/m³", id: 6 },
+  { name: "ambientNoise", unit: "dBA", id: 7 },
+  { name: "iaqIndex", unit: "index", id: 8 },
+  { name: "batteryPercentage", unit: "%", id: 9 },
+  { name: "missedConnections", unit: "unknown", id: 10 },
+  { name: "buttonPressed", unit: "boolean", id: 11 },
+];
+
 // (샘플) 공간유형별 프리셋
 // const PRESET_BY_TYPE: Record<string, Array<{ label: string; unit: string; thresholds: Threshold[] }>> = {
 //   강의실: [
@@ -219,12 +233,27 @@ function SpaceFormBody({
                     <button onClick={() => removeItem(it.id)} aria-label="항목 삭제" title="항목 삭제" className="shrink-0 text-gray-500 hover:text-red-600">
                       <img src="/icons/tabler_trash.png" alt="삭제 아이콘" className="w-5 h-5" />
                     </button>
-                    <input
-                      className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400"
-                      value={it.label}
-                      onChange={(e) => changeLabel(it.id, e.target.value)}
-                      placeholder="예: 온도, CO₂, 습도"
-                    />
+                    <select
+  className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400"
+  value={it.label}
+  onChange={(e) => {
+    const selected = roomTypes
+      .find((rt) => rt.id === roomTypeId)
+      ?.dataTypes.find((d) => d.name === e.target.value);
+    if (selected) {
+      changeLabel(it.id, selected.name);
+      changeUnit(it.id, selected.unit);
+    }
+  }}
+>
+  <option value="">항목 선택</option>
+  {SENSOR_OPTIONS.map((opt) => (
+    <option key={opt.id} value={opt.name}>
+      {opt.name} ({opt.unit})
+    </option>
+  ))}
+</select>
+
                     <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
                       <input
                         type="checkbox"
