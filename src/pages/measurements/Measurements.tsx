@@ -19,7 +19,7 @@ export default function Measurements() {
   useEffect(() => {
     setExtraActions(<MeasurementsActions selectedIds={selectedIds}/>);
      return () => setExtraActions(null);
-  }, [setExtraActions]);
+  }, [setExtraActions, selectedIds]);
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-6 bg-[var(--white-02)]">
