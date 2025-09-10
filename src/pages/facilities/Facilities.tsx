@@ -35,7 +35,7 @@ export default function Facilities() {
       dataTypes: form.items.map((item) => {
         const dt = rt?.dataTypes.find(d => d.name === item.label);
         return {
-          id: dt?.id ?? 0,              // 백엔드가 기대하는 필드가 dataTypeId라면 여기를 맞춰 주세요
+          id: dt?.id ?? 0,              
           cautionMin: Number(item.thresholds[0].min),
           cautionMax: Number(item.thresholds[0].max),
           dangerMin: Number(item.thresholds[1].min),
@@ -80,6 +80,7 @@ export default function Facilities() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
+        roomTypes={roomTypes} 
       />
     </div>
   );

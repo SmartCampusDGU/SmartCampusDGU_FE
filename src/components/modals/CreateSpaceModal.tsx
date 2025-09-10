@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "@/components/ui/Button";
-import { useRoomTypesQuery } from "@/state/queries/measurements/useRoomTypesQuery";
 import type { RoomTypeItem } from "@/types/measurements/RoomTypeItem";
 
 /* ── 타입 ─────────────────────────────────────────── */
@@ -293,14 +292,13 @@ function SpaceFormBody({
 
 /* ── CreateSpaceModal ─────────────────────────────── */
 export default function CreateSpaceModal({
-  open, onClose, onSave,
+  open, onClose, onSave, roomTypes,
 }: {
   open: boolean;
   onClose: () => void;
   onSave: (v: SpaceFormValue) => void;
+  roomTypes: RoomTypeItem[];
 }) {
-  const { data: roomTypes = [] } = useRoomTypesQuery();
-
   const [roomNo, setRoomNo] = useState("");
   const [roomTypeId, setRoomTypeId] = useState<number | null>(null);
   const [items, setItems] = useState<MeasureItem[]>([
@@ -312,7 +310,23 @@ export default function CreateSpaceModal({
     if (!open) return;
     setRoomNo("");
     setRoomTypeId(roomTypes[0]?.id ?? null);
-    setItems([{ id: uid(), label: "온도", unit: "", thresholds: cloneEmptyLevels(), usePreset: false }]);
+    if (roomTypes[0]) {
+    // roomTypes[0] 의 dataTypes를 MeasureItem으로 변환
+    const defaultItems = roomTypes[0].dataTypes.map((dt) => ({
+      id: uid(),
+      label: dt.name,
+      unit: dt.unit,
+      thresholds: [
+        { level: "주의" as LevelKey,    min: "", max: "" },
+        { level: "위험" as LevelKey,    min: "", max: "" },
+        { level: "응급" as LevelKey,    min: "", max: "" },
+      ],
+      usePreset: false, // 기본은 체크 해제 상태
+    }));
+    setItems(defaultItems);
+  } else {
+    setItems([]);
+  }
   }, [open, roomTypes]);
 
   const handleSave = () => {
