@@ -305,29 +305,34 @@ export default function CreateSpaceModal({
     { id: uid(), label: "온도", unit: "", thresholds: cloneEmptyLevels(), usePreset: false },
   ]);
 
-  // 열릴 때마다 빈값으로 초기화
-  useEffect(() => {
-    if (!open) return;
-    setRoomNo("");
-    setRoomTypeId(roomTypes[0]?.id ?? null);
-    if (roomTypes[0]) {
-    // roomTypes[0] 의 dataTypes를 MeasureItem으로 변환
-    const defaultItems = roomTypes[0].dataTypes.map((dt) => ({
-      id: uid(),
-      label: dt.name,
-      unit: dt.unit,
-      thresholds: [
-        { level: "주의" as LevelKey,    min: "", max: "" },
-        { level: "위험" as LevelKey,    min: "", max: "" },
-        { level: "응급" as LevelKey,    min: "", max: "" },
-      ],
-      usePreset: false, // 기본은 체크 해제 상태
-    }));
-    setItems(defaultItems);
+  // 1) 모달 열릴 때 초기화 (첫 번째 roomType 선택)
+useEffect(() => {
+  if (!open) return;
+  setRoomNo("");
+
+  if (roomTypes.length > 0) {
+    setRoomTypeId(roomTypes[0].id); // 첫 번째 유형 선택
   } else {
+    setRoomTypeId(null);
     setItems([]);
   }
-  }, [open, roomTypes]);
+}, [open, roomTypes]);
+
+// 2) roomTypeId가 바뀔 때 items 세팅
+useEffect(() => {
+  if (!roomTypeId) return;
+  const rt = roomTypes.find(r => r.id === roomTypeId);
+  if (!rt) return;
+
+  const newItems: MeasureItem[] = rt.dataTypes.map((dt) => ({
+    id: uid(),
+    label: dt.name,
+    unit: dt.unit,
+    thresholds: cloneEmptyLevels(),
+    usePreset: false,
+  }));
+  setItems(newItems);
+}, [roomTypeId, roomTypes]);
 
   const handleSave = () => {
     const rt = roomTypes.find(r => r.id === roomTypeId) ?? null;
