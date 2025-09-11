@@ -201,15 +201,12 @@ function SpaceFormBody({
   className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400"
   value={it.label}
   onChange={(e) => {
-    const selected = roomTypes
-      .find((rt) => rt.id === roomTypeId)
-      ?.dataTypes.find((d) => d.name === e.target.value);
-    if (selected) {
-      changeLabel(it.id, selected.name);
-      changeUnit(it.id, selected.unit);
-    }
-  }}
-  disabled={isLoading}
+  const selected = sensorOptions.find((s) => s.name === e.target.value);
+  if (selected) {
+    changeLabel(it.id, selected.name);
+    changeUnit(it.id, selected.unit);
+  }
+}}
 >
   <option value="">항목 선택</option>
   {sensorOptions.map((opt) => (
