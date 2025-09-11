@@ -4,6 +4,7 @@ import type { RegisterSensorRequest } from '@/types/sensors/RegisterSensorReques
 import type { RegisterSensorResponse } from '@/types/sensors/RegisterSensorResponse';
 import type { DeleteSensorBody, DeleteSensorPath } from '@/types/sensors/DeleteSensorRequest';
 import type { DeleteSensorResponse } from '@/types/sensors/DeleteSensorResponse';
+import type { GetSensorDataTypesResponse } from '@/types/sensors/GetSensorDataTypesResponse';
 
 /**
  * 센서 등록 (POST /api/sensors)
@@ -30,5 +31,15 @@ export const deleteSensor = async (
     body,
     { headers: { 'Content-Type': 'application/json;charset=UTF-8' } }
   );
+  return res.data;
+};
+
+/**
+ * 센서 데이터 타입 목록 조회 (GET /api/sensors/data-types)
+ */
+export const getSensorDataTypes = async (): Promise<GetSensorDataTypesResponse> => {
+  const res = await axiosInstance.get<GetSensorDataTypesResponse>('/api/sensors/data-types', {
+    headers: { 'Accept': 'application/json;charset=UTF-8' },
+  });
   return res.data;
 };
