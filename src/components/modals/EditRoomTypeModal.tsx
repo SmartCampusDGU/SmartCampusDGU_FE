@@ -2,26 +2,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "@/components/ui/Button";
+import { useSensorDataTypesQuery } from "@/state/queries/sensors/useSensorDataTypesQuery";
 
 /* ── 타입 & 유틸 ────────────────────────────────── */
 type LevelKey = "주의" | "위험" | "응급";
 type Threshold = { level: LevelKey; min: string; max: string };
 type MeasureItem = { id: string; label: string; unit: string; thresholds: Threshold[] };
 export type TypeFormValue = { spaceType: string; items: MeasureItem[] };
-
-const SENSOR_OPTIONS = [
-  { name: "rssi", unit: "unknown", id: 1 },
-  { name: "aqmScores", unit: "unknown", id: 2 },
-  { name: "usbPowered", unit: "boolean", id: 3 },
-  { name: "temperature", unit: "℃", id: 4 },
-  { name: "humidity", unit: "%", id: 5 },
-  { name: "tvoc", unit: "ug/m³", id: 6 },
-  { name: "ambientNoise", unit: "dBA", id: 7 },
-  { name: "iaqIndex", unit: "index", id: 8 },
-  { name: "batteryPercentage", unit: "%", id: 9 },
-  { name: "missedConnections", unit: "unknown", id: 10 },
-  { name: "buttonPressed", unit: "boolean", id: 11 },
-];
 
 const EMPTY_LEVELS: Threshold[] = [
   { level: "주의", min: "", max: "" },
@@ -73,6 +60,9 @@ export default function EditRoomTypeModal({
 }: { open: boolean; initial: TypeFormValue; onClose: () => void; onSave: (v: TypeFormValue) => void; }) {
   const [spaceType, setSpaceType] = useState(initial.spaceType);
   const [items, setItems] = useState<MeasureItem[]>(initial.items);
+
+  const { data: sensorData, isLoading } = useSensorDataTypesQuery();
+  const sensorOptions = sensorData?.data ?? [];
 
   useEffect(() => {
     if (!open) return;
@@ -132,15 +122,16 @@ export default function EditRoomTypeModal({
   className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400"
   value={it.label}
   onChange={(e) => {
-    const selected = SENSOR_OPTIONS.find((s) => s.name === e.target.value);
+    const selected = sensorOptions.find((s) => s.name === e.target.value);
     if (selected) {
       changeLabel(it.id, selected.name);
       changeUnit(it.id, selected.unit);
     }
   }}
+  disabled={isLoading}
 >
   <option value="">항목 선택</option>
-  {SENSOR_OPTIONS.map((opt) => (
+  {sensorOptions.map((opt) => (
     <option key={opt.id} value={opt.name}>
       {opt.name} ({opt.unit})
     </option>
