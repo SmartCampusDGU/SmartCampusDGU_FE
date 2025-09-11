@@ -35,7 +35,7 @@ export default function Facilities() {
       dataTypes: form.items.map((item) => {
         const dt = rt?.dataTypes.find(d => d.name === item.label);
         return {
-          id: dt?.id ?? 0,              
+          id: dt?.dataTypeId ?? 0,              
           cautionMin: Number(item.thresholds[0].min),
           cautionMax: Number(item.thresholds[0].max),
           dangerMin: Number(item.thresholds[1].min),
