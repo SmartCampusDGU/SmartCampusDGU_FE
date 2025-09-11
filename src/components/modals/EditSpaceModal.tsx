@@ -30,32 +30,6 @@ const EMPTY_LEVELS: Threshold[] = [
   { level: "응급", min: "", max: "" },
 ];
 
-// (샘플) 공간유형별 프리셋
-// const PRESET_BY_TYPE: Record<string, Array<{ label: string; unit: string; thresholds: Threshold[] }>> = {
-//   강의실: [
-//     { label: "온도", unit: "℃", thresholds: [
-//       { level: "주의", min: "0", max: "36" },
-//       { level: "위험", min: "36", max: "38" },
-//       { level: "응급", min: "38", max: "50" },
-//     ]},
-//     { label: "CO₂", unit: "ppm", thresholds: [
-//       { level: "주의", min: "800",  max: "1200" },
-//       { level: "위험", min: "1200", max: "2000" },
-//       { level: "응급", min: "2000", max: "5000" },
-//     ]},
-//   ],
-//   실험실: [
-//     { label: "온도", unit: "℃", thresholds: [
-//       { level: "주의", min: "0",  max: "35" },
-//       { level: "위험", min: "35", max: "37" },
-//       { level: "응급", min: "37", max: "50" },
-//     ]},
-//   ],
-//   연구실: [],
-//   전산실: [],
-//   사무실: [],
-// };
-
 const uid = () => Math.random().toString(36).slice(2, 9);
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v));
 const cloneEmptyLevels = () => clone(EMPTY_LEVELS);
