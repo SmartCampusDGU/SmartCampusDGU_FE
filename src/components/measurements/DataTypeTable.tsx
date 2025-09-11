@@ -6,20 +6,7 @@ import { Td, Th } from '../common/Table';
 import { useRoomTypesQuery } from '@/state/queries/measurements/useRoomTypesQuery';
 import type { RoomTypeItem } from '@/types/measurements/RoomTypeItem';
 import { useUpdateRoomTypeMutation } from '@/state/mutations/measurements/useUpdateRoomTypeMutation';
-
-const SENSOR_OPTIONS = [
-  { name: "rssi", unit: "unknown", id: 1 },
-  { name: "aqmScores", unit: "unknown", id: 2 },
-  { name: "usbPowered", unit: "boolean", id: 3 },
-  { name: "temperature", unit: "℃", id: 4 },
-  { name: "humidity", unit: "%", id: 5 },
-  { name: "tvoc", unit: "ug/m³", id: 6 },
-  { name: "ambientNoise", unit: "dBA", id: 7 },
-  { name: "iaqIndex", unit: "index", id: 8 },
-  { name: "batteryPercentage", unit: "%", id: 9 },
-  { name: "missedConnections", unit: "unknown", id: 10 },
-  { name: "buttonPressed", unit: "boolean", id: 11 },
-];
+import { useSensorDataTypesQuery } from '@/state/queries/sensors/useSensorDataTypesQuery';
 
 interface DataTypeTableProps {
   selectedIds: number[];
@@ -32,6 +19,9 @@ export default function DataTypeTable({
 }: DataTypeTableProps) {
   const { data: roomTypes = [] } = useRoomTypesQuery();
   const updateRoomTypeMutation = useUpdateRoomTypeMutation();
+  const { data: sensorData } = useSensorDataTypesQuery();
+  const sensorOptions = sensorData?.data ?? [];
+
 
   const [modalOpen, setModalOpen] = useState(false);
   const [currentRow, setCurrentRow] = useState<RoomTypeItem | null>(null);
@@ -48,7 +38,7 @@ export default function DataTypeTable({
       name: form.spaceType,
       description: "",
       dataTypes: form.items.map((item) => {
-  const sensor = SENSOR_OPTIONS.find((s) => s.name === item.label);
+  const sensor = sensorOptions.find((s) => s.name === item.label);
   if (!sensor) throw new Error("Invalid sensor name");
 
   return {
