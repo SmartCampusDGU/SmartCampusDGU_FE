@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "@/components/ui/Button";
 import type { RoomTypeItem } from "@/types/measurements/RoomTypeItem";
+import { useSensorDataTypesQuery } from "@/state/queries/sensors/useSensorDataTypesQuery";
 
 /* ── 타입 ─────────────────────────────────────────── */
 type LevelKey = "주의" | "위험" | "응급";
@@ -27,46 +28,6 @@ const EMPTY_LEVELS: Threshold[] = [
   { level: "위험", min: "", max: "" },
   { level: "응급", min: "", max: "" },
 ];
-
-const SENSOR_OPTIONS = [
-  { name: "rssi", unit: "unknown", id: 1 },
-  { name: "aqmScores", unit: "unknown", id: 2 },
-  { name: "usbPowered", unit: "boolean", id: 3 },
-  { name: "temperature", unit: "℃", id: 4 },
-  { name: "humidity", unit: "%", id: 5 },
-  { name: "tvoc", unit: "ug/m³", id: 6 },
-  { name: "ambientNoise", unit: "dBA", id: 7 },
-  { name: "iaqIndex", unit: "index", id: 8 },
-  { name: "batteryPercentage", unit: "%", id: 9 },
-  { name: "missedConnections", unit: "unknown", id: 10 },
-  { name: "buttonPressed", unit: "boolean", id: 11 },
-];
-
-// (샘플) 공간유형별 프리셋
-// const PRESET_BY_TYPE: Record<string, Array<{ label: string; unit: string; thresholds: Threshold[] }>> = {
-//   강의실: [
-//     { label: "온도", unit: "℃", thresholds: [
-//       { level: "주의", min: "0", max: "36" },
-//       { level: "위험", min: "36", max: "38" },
-//       { level: "응급", min: "38", max: "50" },
-//     ]},
-//     { label: "CO₂", unit: "ppm", thresholds: [
-//       { level: "주의", min: "800",  max: "1200" },
-//       { level: "위험", min: "1200", max: "2000" },
-//       { level: "응급", min: "2000", max: "5000" },
-//     ]},
-//   ],
-//   실험실: [
-//     { label: "온도", unit: "℃", thresholds: [
-//       { level: "주의", min: "0",  max: "35" },
-//       { level: "위험", min: "35", max: "37" },
-//       { level: "응급", min: "37", max: "50" },
-//     ]},
-//   ],
-//   연구실: [],
-//   전산실: [],
-//   사무실: [],
-// };
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v));
@@ -125,6 +86,9 @@ function SpaceFormBody({
   onClose: () => void; onSave: () => void;
   roomTypes: RoomTypeItem[];
 }) {
+  const { data: sensorData, isLoading } = useSensorDataTypesQuery();
+  const sensorOptions = sensorData?.data ?? [];
+
   const canSave = useMemo(() => roomNo.trim().length > 0 && !!roomTypeId, [roomNo, roomTypeId]);
 
   // 선택된 roomType 객체/이름
@@ -245,9 +209,10 @@ function SpaceFormBody({
       changeUnit(it.id, selected.unit);
     }
   }}
+  disabled={isLoading}
 >
   <option value="">항목 선택</option>
-  {SENSOR_OPTIONS.map((opt) => (
+  {sensorOptions.map((opt) => (
     <option key={opt.id} value={opt.name}>
       {opt.name} ({opt.unit})
     </option>
