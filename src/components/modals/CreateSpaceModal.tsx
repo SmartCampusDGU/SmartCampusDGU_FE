@@ -207,6 +207,7 @@ function SpaceFormBody({
     changeUnit(it.id, selected.unit);
   }
 }}
+disabled={isLoading}
 >
   <option value="">항목 선택</option>
   {sensorOptions.map((opt) => (
