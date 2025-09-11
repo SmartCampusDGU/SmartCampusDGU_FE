@@ -5,20 +5,7 @@ import { DeleteTypeModal } from "@/components/modals/DeleteTypeModal";
 import type { TypeFormValue } from "@/components/modals/EditRoomTypeModal";
 import { useCreateRoomTypeMutation } from "@/state/mutations/measurements/useCreateRoomTypeMutation";
 import { useDeleteRoomTypeMutation } from "@/state/mutations/measurements/useDeleteRoomTypeMutation";
-
-const SENSOR_OPTIONS = [
-  { name: "rssi", unit: "unknown", id: 1 },
-  { name: "aqmScores", unit: "unknown", id: 2 },
-  { name: "usbPowered", unit: "boolean", id: 3 },
-  { name: "temperature", unit: "℃", id: 4 },
-  { name: "humidity", unit: "%", id: 5 },
-  { name: "tvoc", unit: "ug/m³", id: 6 },
-  { name: "ambientNoise", unit: "dBA", id: 7 },
-  { name: "iaqIndex", unit: "index", id: 8 },
-  { name: "batteryPercentage", unit: "%", id: 9 },
-  { name: "missedConnections", unit: "unknown", id: 10 },
-  { name: "buttonPressed", unit: "boolean", id: 11 },
-];
+import { useSensorDataTypesQuery } from "@/state/queries/sensors/useSensorDataTypesQuery";
 
 export default function MeasurementsActions({ selectedIds }: { selectedIds: number[] }) {
   const [createOpen, setCreateOpen] = useState(false);
@@ -26,13 +13,16 @@ export default function MeasurementsActions({ selectedIds }: { selectedIds: numb
 
   const createRoomTypeMutation = useCreateRoomTypeMutation();
   const deleteRoomTypeMutation = useDeleteRoomTypeMutation();
+  const { data } = useSensorDataTypesQuery();
+
+  const sensorOptions = data?.data ?? [];
 
     const handleCreateSave = (form: TypeFormValue) => {
     const request = {
       name: form.spaceType,
       description: "",
      dataTypes: form.items.map((item) => {
-  const sensor = SENSOR_OPTIONS.find((s) => s.name === item.label);
+  const sensor = sensorOptions.find((s) => s.name === item.label);
   if (!sensor) throw new Error("Invalid sensor name");
 
   return {
