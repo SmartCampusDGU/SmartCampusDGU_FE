@@ -32,19 +32,40 @@ export default function Facilities() {
     const request: CreateRoomRequest = {
       roomNumber: form.roomNo,          // roomNo로 저장
       roomTypeId: form.roomTypeId,      // 모달에서 받은 id 사용
-      dataTypes: form.items.map((item) => {
-        const dt = rt?.dataTypes.find(d => d.name === item.label);
-        return {
-          id: dt?.dataTypeId ?? 0,              
-          cautionMin: Number(item.thresholds[0].min),
-          cautionMax: Number(item.thresholds[0].max),
-          dangerMin: Number(item.thresholds[1].min),
-          dangerMax: Number(item.thresholds[1].max),
-          emergencyMin: Number(item.thresholds[2].min),
-          emergencyMax: Number(item.thresholds[2].max),
-          isModified: true,
-        };
-      }),
+       dataTypes: form.items.map((item) => {
+      const dt = rt?.dataTypes.find(d => d.name === item.label);
+
+      const cautionMin = Number(item.thresholds[0].min);
+      const cautionMax = Number(item.thresholds[0].max);
+      const dangerMin = Number(item.thresholds[1].min);
+      const dangerMax = Number(item.thresholds[1].max);
+      const emergencyMin = Number(item.thresholds[2].min);
+      const emergencyMax = Number(item.thresholds[2].max);
+
+      let isModified = true; // 기본 true
+      if (dt) {
+        const sameValues =
+          dt.cautionMin === cautionMin &&
+          dt.cautionMax === cautionMax &&
+          dt.dangerMin === dangerMin &&
+          dt.dangerMax === dangerMax &&
+          dt.emergencyMin === emergencyMin &&
+          dt.emergencyMax === emergencyMax;
+
+        isModified = !sameValues;
+      }
+
+      return {
+        id: dt?.dataTypeId ?? 0, 
+        cautionMin,
+        cautionMax,
+        dangerMin,
+        dangerMax,
+        emergencyMin,
+        emergencyMax,
+        isModified,
+      };
+    }),
     };
 
     createRoomMutation.mutate(request, {
