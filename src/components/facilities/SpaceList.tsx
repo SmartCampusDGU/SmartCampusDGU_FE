@@ -105,13 +105,15 @@ export default function SpaceList() {
                 <Td className="text-center">{r.roomNumber}</Td>
                 <Td className="text-center">
                   <div className="flex justify-center items-center gap-2 py-2">
-                    {r.dataTypes.map((t, idx) => (
-                      <Tag
-                        key={`${r.id}-${t.name}-${idx}`}
-                        label={t.name}
-                        variant={getTagVariant(t.name)}
-                      />
-                    ))}
+                    {r.dataTypes
+      .filter((t) => t.isModified) // 수정된 데이터타입만 표시
+      .map((t, idx) => (
+        <Tag
+          key={`${r.id}-${t.name}-${idx}`}
+          label={t.name}
+          variant={getTagVariant(t.name)}
+        />
+      ))}
                   </div>
                 </Td>
                 <Td className="text-right">
