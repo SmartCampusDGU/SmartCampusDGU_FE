@@ -204,41 +204,35 @@ function SpaceFormBody({
                     <button onClick={() => removeItem(it.id)} aria-label="항목 삭제" title="항목 삭제" className="shrink-0 text-gray-500 hover:text-red-600">
                       <img src="/icons/tabler_trash.png" alt="삭제 아이콘" className="w-5 h-5" />
                     </button>
-                    <input
-                      className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400"
-                      value={it.label}
-                      onChange={(e) => changeLabel(it.id, e.target.value)}
-                      placeholder="예: 온도, CO₂, 습도"
-                    />
-                    <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
-                      <select
-                  className="flex-1 rounded-lg border px-4 py-3"
-                  value={it.label}
-                  onChange={(e) => {
-                    const selected = sensorOptions.find((s) => s.name === e.target.value);
-                    if (selected) {
-                      changeLabel(it.id, selected.name);
-                      changeUnit(it.id, selected.unit);
-                    }
-                  }}
-                  disabled={isLoading}
-                >
-                  <option value="">항목 선택</option>
-                  {sensorOptions.map((opt) => (
-                    <option key={opt.id} value={opt.name}>
-                      {opt.name} ({opt.unit})
-                    </option>
-                  ))}
-                </select>
-                      <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
-                      <input
-                        type="checkbox"
-                        checked={!!it.usePreset}
-                        onChange={(e) => toggleUsePreset(it.id, e.target.checked)}
-                      />
-                      <span>기본값</span>
-                    </label>
-                    </label>
+                     {/* 드롭다운 */}
+            <select
+              className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-amber-400"
+              value={it.label}
+              onChange={(e) => {
+                const selected = sensorOptions.find((s) => s.name === e.target.value);
+                if (selected) {
+                  changeLabel(it.id, selected.name);
+                  changeUnit(it.id, selected.unit);
+                }
+              }}
+              disabled={isLoading}
+            >
+              <option value="">항목 선택</option>
+              {sensorOptions.map((opt) => (
+                <option key={opt.id} value={opt.name}>
+                  {opt.name} ({opt.unit})
+                </option>
+              ))}
+            </select>
+                    {/* 기본값 체크박스 */}
+            <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
+              <input
+                type="checkbox"
+                checked={!!it.usePreset}
+                onChange={(e) => toggleUsePreset(it.id, e.target.checked)}
+              />
+              <span>기본값</span>
+            </label>
                   </div>
                 </div>
 
