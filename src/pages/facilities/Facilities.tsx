@@ -10,6 +10,7 @@ import type { CreateRoomRequest } from '@/types/facilities/CreateRoomRequest';
 import type { SpaceFormValue } from '@/components/modals/CreateSpaceModal';
 import { useRoomTypesQuery } from '@/state/queries/measurements/useRoomTypesQuery';
 import type { RoomTypeItem } from '@/types/measurements/RoomTypeItem';
+import { useSensorDataTypesQuery } from '@/state/queries/sensors/useSensorDataTypesQuery';
 
 type LayoutOutletContext = {
   setExtraActions: (node: React.ReactNode) => void;
@@ -22,18 +23,21 @@ export default function Facilities() {
   const createRoomMutation = useCreateRoomMutation();
   const { data: roomTypes = [] } = useRoomTypesQuery();
 
+  const { data: sensorData } = useSensorDataTypesQuery();
+ const sensorOptions = sensorData?.data ?? [];
+
   const { setExtraActions } = useOutletContext<LayoutOutletContext>();
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleSave = (form: SpaceFormValue) => {
     // 선택된 roomType
     const rt: RoomTypeItem | undefined = roomTypes.find(r => r.id === form.roomTypeId);
+
     // label -> dataTypeId 매핑
     const request: CreateRoomRequest = {
       roomNumber: form.roomNo,          // roomNo로 저장
       roomTypeId: form.roomTypeId,      // 모달에서 받은 id 사용
        dataTypes: form.items.map((item) => {
-      const dt = rt?.dataTypes.find(d => d.name === item.label);
 
       const cautionMin = Number(item.thresholds[0].min);
       const cautionMax = Number(item.thresholds[0].max);
@@ -41,6 +45,12 @@ export default function Facilities() {
       const dangerMax = Number(item.thresholds[1].max);
       const emergencyMin = Number(item.thresholds[2].min);
       const emergencyMax = Number(item.thresholds[2].max);
+
+       // roomType에서 기존 정의된 데이터타입 찾기
+      const dt = rt?.dataTypes.find((d) => d.name === item.label);
+
+      // 전체 센서 목록에서 매칭 (새로운 센서일 경우에도 id 매핑 가능)
+      const sensor = sensorOptions.find((s) => s.name === item.label);
 
       let isModified = true; // 기본 true
       if (dt) {
@@ -56,7 +66,7 @@ export default function Facilities() {
       }
 
       return {
-        id: dt?.dataTypeId ?? 0, 
+        id: dt?.dataTypeId ?? sensor?.id ?? 0,
         cautionMin,
         cautionMax,
         dangerMin,
