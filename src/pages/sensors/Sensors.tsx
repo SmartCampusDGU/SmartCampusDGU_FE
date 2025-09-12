@@ -105,7 +105,7 @@ function SensorRegisterForm({
 
   const errors = {
     roomNo: !roomNo.trim() ? "강의실 번호를 입력해주세요." : "",
-    serial: !serial.trim() ? "센서 식별 번호(Serial No)를 입력해주세요." : "",
+    serial: !serial.trim() ? "센서 MAC 주소를 입력해주세요." : "",
   };
   const isValid = !errors.roomNo && !errors.serial;
 
@@ -137,8 +137,8 @@ function SensorRegisterForm({
         error={errors.roomNo}
       />
       <Field
-        label="№ 센서 식별 번호"
-        placeholder="센서 하단의 Serial No (예) 3B73-A1C6-8IK21-RA06"
+        label="№ 센서 MAC 주소"
+        placeholder="(예) 0C:7B:C8:FF:56:F1"
         value={serial}
         onChange={setSerial}
         error={errors.serial}
@@ -175,7 +175,7 @@ function SensorDeleteForm({
 
   const errors = {
     roomNo: !roomNo.trim() ? "강의실 번호를 입력해주세요." : "",
-    serial: !serial.trim() ? "센서 식별 번호(Serial No)를 입력해주세요." : "",
+    serial: !serial.trim() ? "센서 MAC 주소를 입력해주세요." : "",
   };
   const isValid = !errors.roomNo && !errors.serial;
 
@@ -221,8 +221,8 @@ function SensorDeleteForm({
           error={errors.roomNo}
         />
         <Field
-          label="№ 센서 식별 번호"
-          placeholder="센서 하단의 Serial No (예) 3B73-A1C6-8IK21-RA06"
+          label="№ 센서 MAC 주소"
+          placeholder="(예) 0C:7B:C8:FF:56:F1"
           value={serial}
           onChange={setSerial}
           error={errors.serial}
