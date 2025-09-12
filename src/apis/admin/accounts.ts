@@ -26,9 +26,18 @@ export const updateAdminAccount = async (
   id: number,
   payload: UpdateMemberRequest
 ): Promise<UpdateMemberResponse> => {
-  const res = await axiosInstance.patch<UpdateMemberResponse>(`/api/members/${id}`, payload);
+  // password가 빈 문자열이면 삭제
+  const body = { ...payload };
+  if (typeof body.password === "string" && body.password.trim() === "") {
+    delete body.password; // 빈 문자열/스페이스면 비번 필드 자체를 안 보냄 → 서버는 기존 비번 유지
+}
+
+  const res = await axiosInstance.patch<UpdateMemberResponse>(
+    `/api/members/${id}`,
+    body
+  );
   return res.data;
-};
+}; 
 
 /** 삭제 */
 export const deleteAdminAccounts = async (
