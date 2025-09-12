@@ -1,5 +1,7 @@
-import type { CreateRoomRequest } from "./CreateRoomRequest";
+import type { CreateRoomDataType } from "./CreateRoomDataType";
 
 export interface UpdateRoomRequest {
-  dataTypes: CreateRoomRequest[];
+  roomNumber: string;
+  roomTypeId: number;
+  dataTypes: CreateRoomDataType[];
 }
