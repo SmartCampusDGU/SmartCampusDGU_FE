@@ -7,6 +7,9 @@ import { Td, Th } from '../common/Table';
 import { useRoomsQuery } from '@/state/queries/facilities/useRoomsQuery';
 import type { RoomListItem } from '@/types/facilities/RoomListItem';
 import { useRoomTypesQuery } from '@/state/queries/measurements/useRoomTypesQuery';
+import { useUpdateRoomMutation } from '@/state/mutations/facilities/useUpdateRoomMutation';
+import { useSensorDataTypesQuery } from '@/state/queries/sensors/useSensorDataTypesQuery';
+import type { UpdateRoomRequest } from '@/types/facilities/UpdateRoomRequest';
 
 export default function SpaceList() {
   // 방 타입 목록(탭)
@@ -41,14 +44,74 @@ export default function SpaceList() {
   const [editOpen, setEditOpen] = useState(false);
   const [currentRow, setCurrentRow] = useState<RoomListItem | null>(null);
 
+  const updateRoomMutation = useUpdateRoomMutation(currentRow?.id ?? 0);
+  const { data: sensorData } = useSensorDataTypesQuery();
+  const sensorOptions = sensorData?.data ?? [];
+
   const handleDetailClick = (row: RoomListItem) => {
     setCurrentRow(row);
     setEditOpen(true);
   };
 
   const handleSave = (form: SpaceFormValue) => {
-    console.log("저장된 공간 정보:", form);
-    setEditOpen(false);
+    if (!currentRow) return;
+
+    const rt = roomTypes.find((r) => r.id === form.roomTypeId);
+
+    const request: UpdateRoomRequest = {
+    roomNumber: form.roomNo,
+    roomTypeId: form.roomTypeId,
+    dataTypes: form.items.map((item) => {
+      const cautionMin = Number(item.thresholds[0].min);
+      const cautionMax = Number(item.thresholds[0].max);
+      const dangerMin = Number(item.thresholds[1].min);
+      const dangerMax = Number(item.thresholds[1].max);
+      const emergencyMin = Number(item.thresholds[2].min);
+      const emergencyMax = Number(item.thresholds[2].max);
+
+      // roomType 기본값에서 동일한 센서 찾기
+      const base = rt?.dataTypes.find((d) => d.name === item.label);
+
+      // 센서 아이디 매핑 (roomType 기본값 없으면 sensorDataTypes API에서 가져온 id 사용해야 함)
+      const sensor = sensorOptions.find((s) => s.name === item.label);
+      const id = base?.dataTypeId ?? sensor?.id ?? 0;
+
+      // isModified 판정
+      let isModified = true;
+      if (base) {
+        const sameValues =
+          base.cautionMin === cautionMin &&
+          base.cautionMax === cautionMax &&
+          base.dangerMin === dangerMin &&
+          base.dangerMax === dangerMax &&
+          base.emergencyMin === emergencyMin &&
+          base.emergencyMax === emergencyMax;
+
+        isModified = !sameValues;
+      }
+
+      return {
+        id,
+        cautionMin,
+        cautionMax,
+        dangerMin,
+        dangerMax,
+        emergencyMin,
+        emergencyMax,
+        isModified,
+      };
+    }),
+  };
+
+    updateRoomMutation.mutate(request, {
+      onSuccess: () => {
+        console.log("공간 수정 성공");
+        setEditOpen(false);
+      },
+      onError: (err) => {
+        console.error("공간 수정 실패:", err);
+      },
+    });
   };
 
   // 라벨 -> 태그 variant 매핑
