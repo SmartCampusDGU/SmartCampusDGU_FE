@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import Button from "@/components/ui/Button";
 import { useRoomTypesQuery } from "@/state/queries/measurements/useRoomTypesQuery";
 import type { RoomTypeItem } from "@/types/measurements/RoomTypeItem";
+import { useSensorDataTypesQuery } from "@/state/queries/sensors/useSensorDataTypesQuery";
 
 /* ── 타입 ─────────────────────────────────────────── */
 type LevelKey = "주의" | "위험" | "응급";
@@ -105,6 +106,9 @@ function SpaceFormBody({
   onClose: () => void; onSave: () => void;
   roomTypes: RoomTypeItem[];
 }) {
+  const { data: sensorData, isLoading } = useSensorDataTypesQuery();
+  const sensorOptions = sensorData?.data ?? [];
+
   const canSave = useMemo(() => roomNo.trim().length > 0 && !!roomTypeId, [roomNo, roomTypeId]);
 
   const selectedRoomType = useMemo(
@@ -207,12 +211,33 @@ function SpaceFormBody({
                       placeholder="예: 온도, CO₂, 습도"
                     />
                     <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
+                      <select
+                  className="flex-1 rounded-lg border px-4 py-3"
+                  value={it.label}
+                  onChange={(e) => {
+                    const selected = sensorOptions.find((s) => s.name === e.target.value);
+                    if (selected) {
+                      changeLabel(it.id, selected.name);
+                      changeUnit(it.id, selected.unit);
+                    }
+                  }}
+                  disabled={isLoading}
+                >
+                  <option value="">항목 선택</option>
+                  {sensorOptions.map((opt) => (
+                    <option key={opt.id} value={opt.name}>
+                      {opt.name} ({opt.unit})
+                    </option>
+                  ))}
+                </select>
+                      <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
                       <input
                         type="checkbox"
                         checked={!!it.usePreset}
                         onChange={(e) => toggleUsePreset(it.id, e.target.checked)}
                       />
                       <span>기본값</span>
+                    </label>
                     </label>
                   </div>
                 </div>
