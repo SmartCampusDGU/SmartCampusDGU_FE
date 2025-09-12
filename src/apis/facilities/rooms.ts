@@ -41,6 +41,6 @@ export const updateRoom = async (
   roomId: number,
   data: UpdateRoomRequest
 ): Promise<RoomApiResponse<RoomDetail>> => {
-  const response = await axiosInstance.patch<RoomApiResponse<RoomDetail>>(`/api/rooms/${roomId}`, data);
+  const response = await axiosInstance.put<RoomApiResponse<RoomDetail>>(`/api/rooms/${roomId}`, data);
   return response.data;
 };
