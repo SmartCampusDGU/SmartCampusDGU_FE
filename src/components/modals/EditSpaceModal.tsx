@@ -5,6 +5,7 @@ import Button from "@/components/ui/Button";
 import { useRoomTypesQuery } from "@/state/queries/measurements/useRoomTypesQuery";
 import type { RoomTypeItem } from "@/types/measurements/RoomTypeItem";
 import { useSensorDataTypesQuery } from "@/state/queries/sensors/useSensorDataTypesQuery";
+import { isSameAsPreset } from "@/utils/facilities/isSameAsPreset";
 
 /* ── 타입 ─────────────────────────────────────────── */
 type LevelKey = "주의" | "위험" | "응급";
@@ -307,20 +308,38 @@ export function EditSpaceModal({
 
   // 열릴 때마다 최신 initial로 재주입
   useEffect(() => {
-    if (!open) return;
-    setRoomNo(initial.roomNo);
-    setRoomTypeId(initial.roomTypeId ?? null);
-    setItems(clone(initial.items));
-  }, [open, initial]);
+  if (!open) return;
+  setRoomNo(initial.roomNo);
+  setRoomTypeId(initial.roomTypeId ?? null);
+
+  const rt = roomTypes.find((rt) => rt.id === initial.roomTypeId) ?? null;
+
+  // items 초기화 시 preset 여부 판단
+  const newItems = initial.items.map((it) => ({
+    ...it,
+    usePreset: isSameAsPreset(rt, it),
+  }));
+  setItems(clone(newItems));
+}, [open, initial, roomTypes]);
 
   // roomTypes 로딩 후, initial.roomTypeId가 목록에 없으면 첫 타입으로 기본 설정
   useEffect(() => {
-    if (!open) return;
-    if (roomTypes.length === 0) return;
-    const exists = roomTypes.some((t) => t.id === roomTypeId);
-    if (!exists) {
-      setRoomTypeId(roomTypes[0].id);
-    }
+   if (!open) return;
+  const rt = roomTypes.find((r) => r.id === roomTypeId);
+  if (!rt) return;
+
+  const newItems: MeasureItem[] = rt.dataTypes.map((dt) => ({
+    id: uid(),
+    label: dt.name,
+    unit: dt.unit,
+    thresholds: [
+      { level: "주의", min: String(dt.cautionMin), max: String(dt.cautionMax) },
+      { level: "위험", min: String(dt.dangerMin), max: String(dt.dangerMax) },
+      { level: "응급", min: String(dt.emergencyMin), max: String(dt.emergencyMax) },
+    ],
+    usePreset: true, // 새 roomType을 선택했으면 모두 기본값 상태
+  }));
+  setItems(newItems);
   }, [open, roomTypes, roomTypeId]);
 
   const selectedRoomType = useMemo(
