@@ -120,7 +120,7 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({
 
           {/* 새 비밀번호 */}
           <div>
-            <label className="block mb-2 font-semibold">새 비밀번호 (선택)</label>
+            <label className="block mb-2 font-semibold"></label>비밀번호</label>
             <input
               value={newPw}
               onChange={(e) => setNewPw(e.target.value)}
