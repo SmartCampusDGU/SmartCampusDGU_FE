@@ -2,24 +2,28 @@ import React from "react";
 import Button from "@/components/ui/Button";
 
 export type AccountRow = {
-  username: string;                 // 로그인 아이디 (문자열)
-  name: string;                     
-  description: string | null;       
+  id: number;
+  username: string;                 // 로그인 아이디
+  name: string;
+  description: string | null;
 };
 
 interface EditAccountModalProps {
   open: boolean;
   onClose: () => void;
   initial: AccountRow;
-
   onSave?: (args: {
+    id: number;
     username: string;
     body: { name: string; description: string | null } & Partial<{ password: string }>;
   }) => void;
   editableUsername?: boolean; // 아이디 수정 가능 여부 (기본 false)
 }
 
-const MIN_NEW_PW_LEN = 6;
+const MIN_PW_LEN = 8;
+const MAX_PW_LEN = 20;
+// 최소 1개 영문 + 1개 숫자 + 1개 특수문자, 길이 8~20
+const PW_POLICY_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,20}$/;
 
 const EditAccountModal: React.FC<EditAccountModalProps> = ({
   open,
@@ -44,19 +48,27 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({
   if (!open) return null;
 
   const baseValid = name.trim().length > 0;
-  const pwTooShort = newPw.length > 0 && newPw.length < MIN_NEW_PW_LEN;
-  const isValid = baseValid && !pwTooShort;
+
+  // 비밀번호가 비어있으면(=변경 안 함) 검증 PASS
+  // 값이 있으면: 길이 8~20 & 영문/숫자/특수문자 모두 포함해야 함
+  const hasPw = newPw.trim().length > 0;
+  const pwLengthInvalid = hasPw && (newPw.length < MIN_PW_LEN || newPw.length > MAX_PW_LEN);
+  const pwPatternInvalid = hasPw && !PW_POLICY_REGEX.test(newPw);
+  const pwInvalid = pwLengthInvalid || pwPatternInvalid;
+
+  const isValid = baseValid && !pwInvalid;
 
   const handleSubmit = () => {
     if (!isValid) return;
 
     const body: { name: string; description: string | null } & Partial<{ password: string }> = {
       name: name.trim(),
-      description: (description ?? "").trim(),
-      ...(newPw.trim() ? { password: newPw.trim() } : {}),
+      // 빈 문자열은 null로 정규화
+      description: (description ?? "").trim() === "" ? null : (description ?? "").trim(),
+      ...(hasPw ? { password: newPw.trim() } : {}),
     };
 
-    onSave?.({ username, body });
+    onSave?.({ id: initial.id, username, body });
   };
 
   return (
@@ -114,12 +126,12 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({
               onChange={(e) => setNewPw(e.target.value)}
               type="password"
               autoComplete="new-password"
-              placeholder={`입력하지 않으면 기존 비밀번호가 유지됩니다 / 최소 ${MIN_NEW_PW_LEN}자`}
+              placeholder="기존 비밀번호 또는 새 비밀번호를 입력해주세요. / 영어·숫자·특수기호 포함 8~20자"
               className="w-full border rounded-md px-3 py-3"
             />
-            {pwTooShort && (
+            {pwInvalid && (
               <p className="mt-1 text-sm text-red-600">
-                새 비밀번호는 최소 {MIN_NEW_PW_LEN}자 이상이어야 합니다.
+                비밀번호는 영어, 숫자, 특수기호를 포함해 8~20자여야 합니다.
               </p>
             )}
             <p className="mt-1 text-sm text-gray-500">

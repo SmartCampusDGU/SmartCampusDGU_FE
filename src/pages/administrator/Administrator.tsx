@@ -1,5 +1,4 @@
 // src/pages/Administrator.tsx
-// src/pages/Administrator.tsx
 import { useMemo, useState } from "react";
 import clsx from "clsx";
 import { useSetPageTitle } from "@/hooks/common/useSetPageTitle";
@@ -9,8 +8,8 @@ import EditAccountModal from "@/components/modals/EditAccountModal";
 import { DeleteModal } from "@/components/modals/DeleteModal";
 import { useAdminAccountsQuery } from "@/state/queries/admin/useAdminAccountsQuery";
 import { useCreateAdminAccountMutation } from "@/state/mutations/admin/useCreateAdminAccountMutation";
-//import { useUpdateAdminAccountMutation } from "@/state/mutations/admin/useUpdateAdminAccountMutation";
-//import { useDeleteAdminAccountsMutation } from "@/state/mutations/admin/useDeleteAdminAccountsMutation";
+import { useUpdateAdminAccountMutation } from "@/state/mutations/admin/useUpdateAdminAccountMutation";
+import { useDeleteAdminAccountsMutation } from "@/state/mutations/admin/useDeleteAdminAccountsMutation";
 
 /* ── 스타일 ─────────────────────────────── */
 const CARD = "bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-gray-200";
@@ -32,38 +31,39 @@ export default function AdministratorPage() {
 
   const { data: accounts = [], isLoading, isError } = useAdminAccountsQuery();
   const createMut = useCreateAdminAccountMutation();
-  //const updateMut = useUpdateAdminAccountMutation();
-  //const _deleteMut = useDeleteAdminAccountsMutation();
+  // const updateMut = useUpdateAdminAccountMutation();
+  // const deleteMut = useDeleteAdminAccountsMutation();
 
   const [openRegister, setOpenRegister] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
-  // 선택 기준: username
-  const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const rows = accounts; // 서버 데이터
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+
+  const rows = accounts; // 서버 데이터 (id 포함 가정)
   const allChecked = rows.length > 0 && selected.size === rows.length;
 
-  const toggleOne = (username: string) =>
-    setSelected(prev => {
+  const toggleOne = (id: number) =>
+    setSelected((prev) => {
       const next = new Set(prev);
-      next.has(username) ? next.delete(username) : next.add(username);
+      next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
 
   const toggleAll = () =>
-    setSelected(prev =>
-      prev.size === rows.length ? new Set() : new Set(rows.map(r => r.username))
+    setSelected((prev) =>
+      prev.size === rows.length ? new Set() : new Set(rows.map((r) => r.id))
     );
 
   const canEdit = selected.size === 1;
   const canDelete = selected.size >= 1;
 
+  /** 선택된 단일 행 찾기 (id 기준) */
   const editRow = useMemo(() => {
     if (selected.size !== 1) return null;
-    const username = [...selected][0];
-    return rows.find(r => r.username === username) ?? null;
+    const id = [...selected][0];
+    return rows.find((r) => r.id === id) ?? null;
   }, [selected, rows]);
 
   const selectionLabel = useMemo(
@@ -71,14 +71,20 @@ export default function AdministratorPage() {
     [selected.size]
   );
 
-  const selectedUsernames = useMemo(() => [...selected], [selected]);
-  const sampleUsernames = useMemo(() => selectedUsernames.slice(0, 5), [selectedUsernames]);
+  const selectedIds = useMemo(() => [...selected], [selected]);
+  const sampleIds = useMemo(() => selectedIds.slice(0, 5), [selectedIds]);
+
+  const updateMut = useUpdateAdminAccountMutation();
+  const deleteMut = useDeleteAdminAccountsMutation(); 
+
+  /** 삭제 메시지는 username 보여주되, 내부는 id로 처리 */
   const deleteMessage = useMemo(() => {
-    const n = selectedUsernames.length;
+    const n = selectedIds.length;
     if (n === 0) return "";
-    if (n === 1) return `정말 '${rows.find(r => r.username === selectedUsernames[0])?.username}' 계정을 삭제하시겠습니까?`;
-    return `정말 '${rows.find(r => r.username === selectedUsernames[0])?.username}' 외 ${n - 1}개 계정을 삭제하시겠습니까?`;
-  }, [selectedUsernames, rows]);
+    const first = rows.find((r) => r.id === selectedIds[0]);
+    if (n === 1) return `정말 '${first?.username}' 계정을 삭  제하시겠습니까?`;
+    return `정말 '${first?.username}' 외 ${n - 1}개 계정을 삭제하시겠습니까?`;
+  }, [selectedIds, rows]);
 
   if (isLoading) return <div className="p-6">불러오는 중...</div>;
   if (isError) return <div className="p-6 text-red-600">불러오기에 실패했습니다.</div>;
@@ -141,15 +147,15 @@ export default function AdministratorPage() {
               </thead>
 
               <tbody>
-                {rows.map(row => (
-                  <tr key={row.username} className={ROW}>
+                {rows.map((row) => (
+                  <tr key={row.id} className={ROW}>
                     <td className="pl-6 pr-20">
                       <input
                         aria-label={`${row.username} 선택`}
                         type="checkbox"
                         className="h-4 w-4 align-middle"
-                        checked={selected.has(row.username)}
-                        onChange={() => toggleOne(row.username)}
+                        checked={selected.has(row.id)}
+                        onChange={() => toggleOne(row.id)}
                       />
                     </td>
                     <td className={clsx(CELL_L, "font-semibold")}>{row.username}</td>
@@ -191,23 +197,24 @@ export default function AdministratorPage() {
         />
       )}
 
-      {/* 수정 모달 */}
+      {/* 수정 모달 → PATCH /api/members/:id */}
       {openEdit && editRow && (
         <EditAccountModal
           open={openEdit}
           onClose={() => setOpenEdit(false)}
           initial={{
+            id: editRow.id,                                  
             username: editRow.username,
             name: editRow.name,
             description: editRow.description ?? "",
-          }}
-          onSave={async ({ username, body }) => {
-            // ❗️ 현재 백엔드 PATCH는 id(PK)를 요구하므로
-            // username만 가지고는 실제 API 호출이 불가합니다.
-            // updateMut.mutateAsync({ id: ???, payload: body });
-            // → 백엔드 수정 필요 (GET에 id 내려주기 or username 기반 API 제공)
-            console.warn("PATCH /api/members/{id} 호출 불가: username만 있음", username, body);
+          }}         
+            onSave={async ({ id, body }) => {
+            try {
+            await updateMut.mutateAsync({ id, payload: body });
             setOpenEdit(false);
+             } catch (err: any) {
+            console.error("PATCH failed:", err?.response?.status, err?.response?.data ?? err);
+            }
           }}
         />
       )}
@@ -221,28 +228,36 @@ export default function AdministratorPage() {
           cancelText="취소"
           onClose={() => setOpenDelete(false)}
           onConfirm={async () => {
-            if (selectedUsernames.length === 0) return;
-            // ❗️ DELETE도 { ids: number[] } 요구 → username만으로는 불가
-            console.warn("DELETE /api/members 호출 불가: username만 있음", selectedUsernames);
-            setSelected(new Set());
-            setOpenDelete(false);
-          }}
+          if (selectedIds.length === 0) return;
+          await deleteMut.mutateAsync(selectedIds);
+          setSelected(new Set());
+          setOpenDelete(false);
+  }}
         >
           <div className="space-y-2 text-center">
             <p className="text-base">{deleteMessage}</p>
-            <p className="text-sm text-gray-600">삭제 대상: 총 <b>{selectedUsernames.length}</b>개</p>
-            {sampleUsernames.length > 0 && (
+            <p className="text-sm text-gray-600">
+              삭제 대상: 총 <b>{selectedIds.length}</b>개
+            </p>
+            {sampleIds.length > 0 && (
               <div className="text-sm">
                 <div className="mb-1 text-gray-600">삭제 예정 아이디</div>
                 <ul className="list-none space-y-0.5">
-                  {sampleUsernames.map((username) => (
-                    <li key={username}>
-                      <code className="px-1 py-0.5 bg-gray-100 rounded">{username}</code>
-                    </li>
-                  ))}
+                  {sampleIds.map((id) => {
+                    const r = rows.find((x) => x.id === id);
+                    return (
+                      <li key={id}>
+                        <code className="px-1 py-0.5 bg-gray-100 rounded">
+                          {r?.username ?? id}
+                        </code>
+                      </li>
+                    );
+                  })}
                 </ul>
-                {selectedUsernames.length > sampleUsernames.length && (
-                  <div className="mt-1 text-gray-600">… 외 {selectedUsernames.length - sampleUsernames.length}개</div>
+                {selectedIds.length > sampleIds.length && (
+                  <div className="mt-1 text-gray-600">
+                    … 외 {selectedIds.length - sampleIds.length}개
+                  </div>
                 )}
               </div>
             )}
