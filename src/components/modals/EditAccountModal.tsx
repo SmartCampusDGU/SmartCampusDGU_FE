@@ -120,13 +120,13 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({
 
           {/* 새 비밀번호 */}
           <div>
-            <label className="block mb-2 font-semibold"></label>비밀번호</label>
+            <label className="block mb-2 font-semibold">비밀번호</label>
             <input
               value={newPw}
               onChange={(e) => setNewPw(e.target.value)}
               type="password"
               autoComplete="new-password"
-              placeholder="기존 비밀번호 또는 새 비밀번호를 입력해주세요. / 영어·숫자·특수기호 포함 8~20자"
+              placeholder="기존 비밀번호 또는 새 비밀번호를 입력해주세요 / 영어·숫자·특수기호 포함 8~20자"
               className="w-full border rounded-md px-3 py-3"
             />
             {pwInvalid && (
