@@ -170,13 +170,13 @@ function SpaceFormBody({
 };
 
   // roomType 변경 시 label 매칭되는 프리셋 재적용
-  useEffect(() => {
-    if (!selectedRoomType) return;
-    setItems((prev) => prev.map((it) => {
-      const preset = findPreset(selectedRoomType, it.label);
-      return preset ? { ...it, unit: preset.unit, thresholds: clone(preset.thresholds), usePreset: true } : it;
-    }));
-  }, [selectedRoomType, setItems]);
+  // useEffect(() => {
+  //   if (!selectedRoomType) return;
+  //   setItems((prev) => prev.map((it) => {
+  //     const preset = findPreset(selectedRoomType, it.label);
+  //     return preset ? { ...it, unit: preset.unit, thresholds: clone(preset.thresholds), usePreset: true } : it;
+  //   }));
+  // }, [selectedRoomType, setItems]);
 
   return (
     <div className="h-full w-full rounded-2xl shadow-xl overflow-hidden bg-amber-50">
@@ -335,6 +335,36 @@ export function EditSpaceModal({
   const [roomTypeId, setRoomTypeId] = useState<number | null>(initial.roomTypeId ?? null);
   const [items, setItems] = useState<MeasureItem[]>(clone(initial.items));
 
+  const handleRoomTypeChange = (newRoomTypeId: number) => {
+  if (newRoomTypeId === roomTypeId) return;
+
+  const rt = roomTypes.find((r) => r.id === newRoomTypeId);
+  if (!rt) return;
+
+  const presetItems: MeasureItem[] = rt.dataTypes.map((dt) => {
+    const thresholds: Threshold[] = [
+      { level: "주의", min: String(dt.cautionMin), max: String(dt.cautionMax) },
+      { level: "위험", min: String(dt.dangerMin), max: String(dt.dangerMax) },
+      { level: "응급", min: String(dt.emergencyMin), max: String(dt.emergencyMax) },
+    ] as const;
+
+    return {
+      id: uid(),
+      label: dt.name,
+      unit: dt.unit,
+      thresholds,
+      usePreset: true,
+      customBackup: {
+        unit: dt.unit,
+        thresholds: clone(thresholds),
+      },
+    };
+  });
+
+  setRoomTypeId(newRoomTypeId);
+  setItems(presetItems);
+};
+
   // 열릴 때마다 최신 initial로 재주입
   useEffect(() => {
   if (!open) return;
@@ -374,7 +404,7 @@ export function EditSpaceModal({
     <ModalBase open={open} onClose={onClose} ariaLabel="공간 수정">
       <SpaceFormBody
         roomNo={roomNo} setRoomNo={setRoomNo}
-        roomTypeId={roomTypeId} setRoomTypeId={(v) => setRoomTypeId(v)}
+         roomTypeId={roomTypeId} setRoomTypeId={handleRoomTypeChange} 
         items={items} setItems={setItems}
         onClose={onClose}
         onSave={handleSave}
