@@ -229,7 +229,7 @@ function SpaceFormBody({
             <label className="flex items-center gap-1 text-sm text-gray-700 ml-1">
               <input
                 type="checkbox"
-                checked={!!it.usePreset}
+                checked={it.usePreset === true}
                 onChange={(e) => toggleUsePreset(it.id, e.target.checked)}
               />
               <span>기본값</span>

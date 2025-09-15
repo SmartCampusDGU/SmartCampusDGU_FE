@@ -219,6 +219,7 @@ export default function SpaceList() {
               id: String(dataType.dataTypeId ?? `${dataType.name}-${dataType.unit}`),
               label: dataType.name,
               unit: dataType.unit,
+              isModified: dataType.isModified,
               thresholds: [
                 { level: "주의", min: String(dataType.cautionMin), max: String(dataType.cautionMax) },
                 { level: "위험", min: String(dataType.dangerMin),  max: String(dataType.dangerMax) },
