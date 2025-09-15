@@ -341,6 +341,8 @@ export function EditSpaceModal({
   const rt = roomTypes.find((r) => r.id === newRoomTypeId);
   if (!rt) return;
 
+  const initialItems = initial.items;
+
   const presetItems: MeasureItem[] = rt.dataTypes.map((dt) => {
     const thresholds: Threshold[] = [
       { level: "주의", min: String(dt.cautionMin), max: String(dt.cautionMax) },
@@ -348,6 +350,22 @@ export function EditSpaceModal({
       { level: "응급", min: String(dt.emergencyMin), max: String(dt.emergencyMax) },
     ] as const;
 
+    // 기존 커스텀 항목 있는지 확인
+    const existing = initialItems.find((item) => item.label === dt.name);
+
+     if (existing) {
+      // preset과 비교해서 동일하면 preset으로 처리
+      const sameAsPreset = isSameAsPreset(rt, existing);
+      return {
+        ...existing,
+        usePreset: sameAsPreset,
+        customBackup: sameAsPreset ? undefined : {
+          unit: existing.unit,
+          thresholds: clone(existing.thresholds),
+        },
+      };
+    }
+    
     return {
       id: uid(),
       label: dt.name,
