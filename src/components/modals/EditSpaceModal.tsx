@@ -16,6 +16,10 @@ type MeasureItem = {
   unit: string;
   thresholds: Threshold[];
   usePreset?: boolean;
+  customBackup?: {
+    unit: string;
+    thresholds: Threshold[];
+  };
 };
 
 export type SpaceFormValue = {
@@ -127,18 +131,43 @@ function SpaceFormBody({
     setItems((p) => p.map((it) => it.id !== id ? it : ({ ...it, thresholds: it.thresholds.map((t) => t.level === lv ? { ...t, [which]: v } : t) })));
 
   const toggleUsePreset = (id: string, checked: boolean) => {
-    setItems((prev) => prev.map((it) => {
+  setItems((prev) =>
+    prev.map((it) => {
       if (it.id !== id) return it;
+
+      const preset = findPreset(selectedRoomType, it.label);
+
       if (checked) {
-        const preset = findPreset(selectedRoomType, it.label);
+        // 커스텀 백업 저장 후 preset 적용
         if (preset) {
-          return { ...it, unit: preset.unit, thresholds: clone(preset.thresholds), usePreset: true };
+          return {
+            ...it,
+            unit: preset.unit,
+            thresholds: clone(preset.thresholds),
+            usePreset: true,
+            customBackup: {
+              unit: it.unit,
+              thresholds: clone(it.thresholds),
+            },
+          };
+        }
+        return { ...it, usePreset: false };
+      } else {
+        // preset 해제 시 커스텀 값 복원
+        if (it.customBackup) {
+          return {
+            ...it,
+            unit: it.customBackup.unit,
+            thresholds: clone(it.customBackup.thresholds),
+            usePreset: false,
+            customBackup: undefined,
+          };
         }
         return { ...it, usePreset: false };
       }
-      return { ...it, usePreset: false };
-    }));
-  };
+    })
+  );
+};
 
   // roomType 변경 시 label 매칭되는 프리셋 재적용
   useEffect(() => {
@@ -315,6 +344,10 @@ export function EditSpaceModal({
   const newItems = initial.items.map((it) => ({
     ...it,
     usePreset: isSameAsPreset(rt, it),
+    customBackup: {
+      unit: it.unit,
+      thresholds: clone(it.thresholds),
+    },
   }));
 
   setRoomNo(initial.roomNo);
