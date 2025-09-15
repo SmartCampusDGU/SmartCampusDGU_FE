@@ -10,7 +10,7 @@ export default function MainPage() {
   useSetPageTitle("이상치 조회");
   useSetActiveNav("search", "abnormal");
 
-  const { data } = useOutliersQuery({ page: 0, size: 20 });
+  const { data } = useOutliersQuery();
 
   const [rows, setRows] = useState<AlertRowView[]>([]);
 
