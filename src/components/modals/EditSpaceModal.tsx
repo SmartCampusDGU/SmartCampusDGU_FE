@@ -309,38 +309,18 @@ export function EditSpaceModal({
   // 열릴 때마다 최신 initial로 재주입
   useEffect(() => {
   if (!open) return;
-  setRoomNo(initial.roomNo);
-  setRoomTypeId(initial.roomTypeId ?? null);
 
   const rt = roomTypes.find((rt) => rt.id === initial.roomTypeId) ?? null;
 
-  // items 초기화 시 preset 여부 판단
   const newItems = initial.items.map((it) => ({
     ...it,
     usePreset: isSameAsPreset(rt, it),
   }));
+
+  setRoomNo(initial.roomNo);
+  setRoomTypeId(initial.roomTypeId ?? null);
   setItems(clone(newItems));
 }, [open, initial, roomTypes]);
-
-  // roomTypes 로딩 후, initial.roomTypeId가 목록에 없으면 첫 타입으로 기본 설정
-  useEffect(() => {
-   if (!open) return;
-  const rt = roomTypes.find((r) => r.id === roomTypeId);
-  if (!rt) return;
-
-  const newItems: MeasureItem[] = rt.dataTypes.map((dt) => ({
-    id: uid(),
-    label: dt.name,
-    unit: dt.unit,
-    thresholds: [
-      { level: "주의", min: String(dt.cautionMin), max: String(dt.cautionMax) },
-      { level: "위험", min: String(dt.dangerMin), max: String(dt.dangerMax) },
-      { level: "응급", min: String(dt.emergencyMin), max: String(dt.emergencyMax) },
-    ],
-    usePreset: true, // 새 roomType을 선택했으면 모두 기본값 상태
-  }));
-  setItems(newItems);
-  }, [open, roomTypes, roomTypeId]);
 
   const selectedRoomType = useMemo(
     () => roomTypes.find((rt) => rt.id === roomTypeId) ?? null,
