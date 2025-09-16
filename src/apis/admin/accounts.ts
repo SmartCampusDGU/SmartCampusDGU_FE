@@ -1,5 +1,6 @@
 import { axiosInstance } from '../axios';
 import type { GetAdminAccountsResponse } from '@/types/admin/GetAdminAccountsResponseType';
+import type { GetAdminAccountByIdResponse } from '@/types/admin/GetAdminAccountByIdResponse';
 import type { CreateMemberRequest } from '@/types/admin/CreateMemberRequestType';
 import type { CreateMemberResponse } from '@/types/admin/CreateMemberResponseType';
 import type { UpdateMemberRequest } from '@/types/admin/UpdateMemberRequestType';
@@ -11,6 +12,14 @@ import type { DeleteMembersResponse } from '@/types/admin/DeleteMembersResponseT
 export const getAdminAccounts = async (): Promise<GetAdminAccountsResponse> => {
   const res = await axiosInstance.get<GetAdminAccountsResponse>('/api/members');
   return res.data;
+};
+
+/** 단일 관리자 계정 조회 */
+export const getAdminAccountById = async (
+  id: number
+): Promise<GetAdminAccountByIdResponse> => {
+  const res = await axiosInstance.get(`/api/members/${id}`);
+  return res.data.data;
 };
 
 /** 생성 */
