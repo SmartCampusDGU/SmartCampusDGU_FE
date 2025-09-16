@@ -7,12 +7,13 @@ import { SuccessModal } from "@/components/modals/SuccessModal";
 import { DeleteTypeModal } from "@/components/modals/DeleteTypeModal";
 import { useRegisterSensorMutation } from "@/state/mutations/sensors/useRegisterSensorMutation";
 import { useDeleteSensorMutation } from "@/state/mutations/sensors/useDeleteSensorMutation";
-import { useRoomsQuery } from "@/state/queries/facilities/useRoomsQuery"; //  roomId 매핑용
+import { useRoomsQuery } from "@/state/queries/facilities/useRoomsQuery";
 
 /* ─────────────────────────────── 유틸 ─────────────────────────────── */
 // 한글/영문/숫자/공백/-/_ 허용
 const ROOM_NUMBER_REGEX = /^[\p{L}\p{N}\s\-_]+$/u;
-const isValidRoomNumber = (v: string) => v.trim().length > 0 && ROOM_NUMBER_REGEX.test(v);
+const isValidRoomNumber = (v: string) =>
+  v.trim().length > 0 && ROOM_NUMBER_REGEX.test(v);
 
 // MAC 주소 검증
 const MAC_REGEX = /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/;
@@ -28,7 +29,10 @@ export default function SensorsPage() {
 
   const { setExtraActions } = useOutletContext<LayoutOutletContext>();
   const [mode, setMode] = useState<Mode>("register");
-  const title = useMemo(() => (mode === "register" ? "센서 등록" : "센서 삭제"), [mode]);
+  const title = useMemo(
+    () => (mode === "register" ? "센서 등록" : "센서 삭제"),
+    [mode]
+  );
 
   // 공용 성공 모달
   const [successOpen, setSuccessOpen] = useState(false);
@@ -58,7 +62,9 @@ export default function SensorsPage() {
       <section className="mt-6 bg-white rounded-lg border border-gray-200 w-full max-w-[1000px] h-[610px] mx-auto flex flex-col">
         {/* 헤더 */}
         <div className="px-6 pt-5 pb-3 border-b">
-          <h2 className="text-[20px] font-extrabold text-[#1F2937]">{title}</h2>
+          <h2 className="text-[20px] font-extrabold text-[#1F2937]">
+            {title}
+          </h2>
         </div>
 
         {/* 본문 */}
@@ -95,24 +101,41 @@ export default function SensorsPage() {
 }
 
 /* ─────────────────────────────── 폼: 등록 ─────────────────────────────── */
-function SensorRegisterForm({ onOpenSuccess }: { onOpenSuccess: (msg?: string) => void }) {
+function SensorRegisterForm({
+  onOpenSuccess,
+}: {
+  onOpenSuccess: (msg?: string) => void;
+}) {
   const [roomNo, setRoomNo] = useState("");
-  const [serial, setSerial] = useState("");
+  const [macAddress, setMacAddress] = useState("");
   const [apiError, setApiError] = useState("");
 
   const { data: roomsData } = useRoomsQuery();
   const { mutateAsync, isPending } = useRegisterSensorMutation({
     onError: (e: any) => {
-      const msg = e?.response?.data?.message || e?.message || "센서 등록 중 오류가 발생했습니다.";
-      setApiError(msg);
+      const msg = e?.response?.data?.message || e?.message;
+
+      if (msg?.includes("존재하지 않는 공간")) {
+        setApiError("등록되지 않은 공간입니다. 공간을 먼저 등록해주세요.");
+      } else if (msg?.includes("중복")) {
+        setApiError("이미 등록된 센서입니다.");
+      } else if (msg?.includes("MAC")) {
+        setApiError("MAC 주소 형식이 올바르지 않습니다.");
+      } else {
+        setApiError("센서 등록 중 오류가 발생했습니다.");
+      }
     },
   });
 
   const errors = {
-    roomNo: !isValidRoomNumber(roomNo) ? "강의실 번호를 확인해주세요. (문자/숫자/공백/-/_ 허용)" : "",
-    serial: !isValidMac(serial) ? "MAC 주소 형식이 올바르지 않습니다. (예: 0C:7B:C8:FF:56:F1)" : "",
+    roomNo: !isValidRoomNumber(roomNo)
+      ? "강의실 번호를 확인해주세요. (문자/숫자/공백/-/_ 허용)"
+      : "",
+    macAddress: !isValidMac(macAddress)
+      ? "MAC 주소 형식이 올바르지 않습니다. (예: 0C:7B:C8:FF:56:F1)"
+      : "",
   };
-  const isValid = !errors.roomNo && !errors.serial;
+  const isValid = !errors.roomNo && !errors.macAddress;
 
   const resolveRoomId = () => {
     const list = roomsData?.rooms ?? [];
@@ -131,10 +154,10 @@ function SensorRegisterForm({ onOpenSuccess }: { onOpenSuccess: (msg?: string) =
       return;
     }
 
-    await mutateAsync({ roomId, macAddress: serial.trim() });
+    await mutateAsync({ roomId, macAddress: macAddress.trim() });
     onOpenSuccess("센서 등록이 완료되었습니다!");
     setRoomNo("");
-    setSerial("");
+    setMacAddress("");
   };
 
   return (
@@ -149,20 +172,27 @@ function SensorRegisterForm({ onOpenSuccess }: { onOpenSuccess: (msg?: string) =
       <Field
         label="№ 센서 MAC 주소"
         placeholder="예) 0C:7B:C8:FF:56:F1"
-        value={serial}
-        onChange={setSerial}
-        error={errors.serial}
+        value={macAddress}
+        onChange={setMacAddress}
+        error={errors.macAddress}
       />
       {apiError && <p className="text-sm text-red-600">{apiError}</p>}
-      <Submit label={isPending ? "등록 중..." : "등록하기"} disabled={!isValid || isPending} />
+      <Submit
+        label={isPending ? "등록 중..." : "등록하기"}
+        disabled={!isValid || isPending}
+      />
     </form>
   );
 }
 
 /* ─────────────────────────────── 폼: 삭제 ─────────────────────────────── */
-function SensorDeleteForm({ onOpenSuccess }: { onOpenSuccess: (msg?: string) => void }) {
+function SensorDeleteForm({
+  onOpenSuccess,
+}: {
+  onOpenSuccess: (msg?: string) => void;
+}) {
   const [roomNo, setRoomNo] = useState("");
-  const [serial, setSerial] = useState("");
+  const [macAddress, setMacAddress] = useState("");
   const [reason, setReason] = useState("");
   const [apiError, setApiError] = useState("");
 
@@ -170,16 +200,29 @@ function SensorDeleteForm({ onOpenSuccess }: { onOpenSuccess: (msg?: string) => 
 
   const { mutateAsync, isPending } = useDeleteSensorMutation({
     onError: (e: any) => {
-      const msg = e?.response?.data?.message || e?.message || "센서 삭제 중 오류가 발생했습니다.";
-      setApiError(msg);
+      const msg = e?.response?.data?.message || e?.message;
+
+      if (msg?.includes("불일치")) {
+        setApiError("강의실 번호와 MAC 주소가 일치하지 않습니다.");
+      } else if (msg?.includes("존재하지 않음")) {
+        setApiError("해당 센서를 찾을 수 없습니다.");
+      } else if (msg?.includes("MAC")) {
+        setApiError("MAC 주소 형식이 올바르지 않습니다.");
+      } else {
+        setApiError("센서 삭제 중 오류가 발생했습니다.");
+      }
     },
   });
 
   const errors = {
-    roomNo: !isValidRoomNumber(roomNo) ? "강의실 번호를 확인해주세요. (문자/숫자/공백/-/_ 허용)" : "",
-    serial: !isValidMac(serial) ? "MAC 주소 형식이 올바르지 않습니다. (예: 0C:7B:C8:FF:56:F1)" : "",
+    roomNo: !isValidRoomNumber(roomNo)
+      ? "강의실 번호를 확인해주세요. (문자/숫자/공백/-/_ 허용)"
+      : "",
+    macAddress: !isValidMac(macAddress)
+      ? "MAC 주소 형식이 올바르지 않습니다. (예: 0C:7B:C8:FF:56:F1)"
+      : "",
   };
-  const isValid = !errors.roomNo && !errors.serial;
+  const isValid = !errors.roomNo && !errors.macAddress;
 
   const handleOpenConfirm = (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,16 +235,20 @@ function SensorDeleteForm({ onOpenSuccess }: { onOpenSuccess: (msg?: string) => 
     setConfirmOpen(false);
     setApiError("");
 
-    await mutateAsync({
-      roomNumber: roomNo.trim(),
-      macAddress: serial.trim(),
-      deleteReason: reason.trim() || "미입력",
-    });
+    try {
+      await mutateAsync({
+        roomNumber: roomNo.trim(),
+        macAddress: macAddress.trim(),
+        deleteReason: reason.trim() || "미입력",
+      });
 
-    onOpenSuccess("센서 삭제가 완료되었습니다!");
-    setRoomNo("");
-    setSerial("");
-    setReason("");
+      onOpenSuccess("센서 삭제가 완료되었습니다!");
+      setRoomNo("");
+      setMacAddress("");
+      setReason("");
+    } catch (error) {
+      // onError에서 처리됨
+    }
   };
 
   return (
@@ -217,9 +264,9 @@ function SensorDeleteForm({ onOpenSuccess }: { onOpenSuccess: (msg?: string) => 
         <Field
           label="№ 센서 MAC 주소"
           placeholder="예) 0C:7B:C8:FF:56:F1"
-          value={serial}
-          onChange={setSerial}
-          error={errors.serial}
+          value={macAddress}
+          onChange={setMacAddress}
+          error={errors.macAddress}
         />
         <Field
           label="📋 삭제 사유"
@@ -228,7 +275,10 @@ function SensorDeleteForm({ onOpenSuccess }: { onOpenSuccess: (msg?: string) => 
           onChange={setReason}
         />
         {apiError && <p className="text-sm text-red-600">{apiError}</p>}
-        <Submit label={isPending ? "삭제 중..." : "삭제하기"} disabled={!isValid || isPending} />
+        <Submit
+          label={isPending ? "삭제 중..." : "삭제하기"}
+          disabled={!isValid || isPending}
+        />
       </form>
 
       <DeleteTypeModal
@@ -257,13 +307,19 @@ function Field({
   const invalid = Boolean(error);
   return (
     <div>
-      <label className="block text-[16px] font-semibold text-[#111827] mb-2">{label}</label>
+      <label className="block text-[16px] font-semibold text-[#111827] mb-2">
+        {label}
+      </label>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={`w-full h-[56px] px-4 rounded-lg border bg-[#F7F7F7] outline-none text-[16px]
-          ${invalid ? "border-red-400 focus:ring-2 focus:ring-red-300" : "border-gray-300 focus:ring-2 focus:ring-black/10"}`}
+          ${
+            invalid
+              ? "border-red-400 focus:ring-2 focus:ring-red-300"
+              : "border-gray-300 focus:ring-2 focus:ring-black/10"
+          }`}
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? `${label}-error` : undefined}
       />
