@@ -7,6 +7,7 @@ import { useLoginStore } from '@/state/store/loginStore';
 const Header = () => {
    const logout = useLoginStore((state) => state.logout);
   const navigate = useNavigate();
+  const user = useLoginStore((state) => state.user);
 
    const handleLogout = async () => {
     try {
@@ -40,7 +41,7 @@ const Header = () => {
         <div className="flex items-center">
           <AccountIcon />
           <span className="ml-[10px] w-[169px] h-[43px] text-[27px] font-medium font-inter text-[var(--black)] leading-normal flex items-center">
-            시설 관리처 님
+            {user?.name ?? '로그인 사용자'} 님
           </span>
         </div>
 
