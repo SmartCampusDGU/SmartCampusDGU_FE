@@ -104,14 +104,45 @@ export default function SpaceList() {
   };
 
     updateRoomMutation.mutate(request, {
-      onSuccess: () => {
-        console.log("공간 수정 성공");
-        setEditOpen(false);
-      },
-      onError: (err) => {
-        console.error("공간 수정 실패:", err);
-      },
-    });
+  onSuccess: () => {
+    console.log("공간 수정 성공");
+    setEditOpen(false);
+
+    setCurrentRow((prev) => {
+  if (!prev) return null;
+
+  const rt = roomTypes.find((r) => r.id === form.roomTypeId);
+
+  return {
+    ...prev,
+    roomTypeId: form.roomTypeId,
+    roomType: rt?.name ?? prev.roomType,
+    dataTypes: form.items.map((item): RoomListItem["dataTypes"][number] => {
+      const dataTypeId =
+        rt?.dataTypes.find((d) => d.name === item.label)?.dataTypeId ??
+        sensorOptions.find((s) => s.name === item.label)?.id ?? 0;
+
+      return {
+        id: dataTypeId,
+        dataTypeId,
+        name: item.label,
+        unit: item.unit,
+        cautionMin: Number(item.thresholds[0].min),
+        cautionMax: Number(item.thresholds[0].max),
+        dangerMin: Number(item.thresholds[1].min),
+        dangerMax: Number(item.thresholds[1].max),
+        emergencyMin: Number(item.thresholds[2].min),
+        emergencyMax: Number(item.thresholds[2].max),
+        isModified: item.usePreset !== true,
+      };
+    }),
+  };
+});
+  },
+  onError: (err) => {
+    console.error("공간 수정 실패:", err);
+  },
+});
   };
 
   // 라벨 -> 태그 variant 매핑
