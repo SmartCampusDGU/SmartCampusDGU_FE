@@ -18,28 +18,22 @@ export const registerSensor = async (
   return res.data;
 };
 
-/**
- * 센서 삭제 (POST /api/sensors/delete/{sensorId})
- */
+/** 센서 삭제 (POST /api/sensors/delete)  ← 경로/시그니처 수정 */
 export const deleteSensor = async (
-  path: DeleteSensorPath,
-  body: DeleteSensorBody
+  body: DeleteSensorRequestBody
 ): Promise<DeleteSensorResponse> => {
-  const { sensorId } = path;
   const res = await axiosInstance.post<DeleteSensorResponse>(
-    `/api/sensors/delete/${sensorId}`,
+    '/api/sensors/delete',
     body,
     { headers: { 'Content-Type': 'application/json;charset=UTF-8' } }
   );
   return res.data;
 };
 
-/**
- * 센서 데이터 타입 목록 조회 (GET /api/sensors/data-types)
- */
+/** 센서 데이터 타입 목록 (GET /api/sensors/data-types) */
 export const getSensorDataTypes = async (): Promise<GetSensorDataTypesResponse> => {
   const res = await axiosInstance.get<GetSensorDataTypesResponse>('/api/sensors/data-types', {
-    headers: { 'Accept': 'application/json;charset=UTF-8' },
+    headers: { Accept: 'application/json;charset=UTF-8' },
   });
   return res.data;
 };
