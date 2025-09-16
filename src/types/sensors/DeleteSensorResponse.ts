@@ -2,5 +2,5 @@
 export interface DeleteSensorResponse {
   code: number;
   message: string;
-  data: string;
+  data?: string;
 }

@@ -112,7 +112,7 @@ function SensorRegisterForm({
 
   const { data: roomsData } = useRoomsQuery();
   const { mutateAsync, isPending } = useRegisterSensorMutation({
-    onError: (e: any) => {
+    onError: (e: any) => {  
       const msg = e?.response?.data?.message || e?.message;
 
       if (msg?.includes("존재하지 않는 공간")) {
@@ -236,12 +236,12 @@ function SensorDeleteForm({
     setApiError("");
 
     try {
-      await mutateAsync({
+      + await mutateAsync({
         roomNumber: roomNo.trim(),
         macAddress: macAddress.trim(),
         deleteReason: reason.trim() || "미입력",
-      });
-
+   });
+ 
       onOpenSuccess("센서 삭제가 완료되었습니다!");
       setRoomNo("");
       setMacAddress("");
