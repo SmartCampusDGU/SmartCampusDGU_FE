@@ -15,11 +15,11 @@ import { useDeleteAdminAccountsMutation } from "@/state/mutations/admin/useDelet
 const CARD = "bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-gray-200";
 const TITLE = "text-[22px] font-extrabold";
 const HEAD_BASE = "text-[17px] font-bold text-gray-900 py-3";
-const HEAD_L = clsx(HEAD_BASE, "text-left px-4");
-const HEAD_C = clsx(HEAD_BASE, "text-center px-6");
-const ROW = "h-[68px] border-b border-gray-200";
-const CELL_L = "px-4 text-[16px] text-gray-900 text-left";
-const CELL_C = "px-6 text-[16px] text-gray-900 text-center";
+const HEAD_L = clsx(HEAD_BASE, "text-center px-4");
+const HEAD_C = clsx(HEAD_BASE, "text-center px-4");
+const ROW = "h-[70px] border-b border-gray-200";
+const CELL_L = "px-4 text-[16px] text-gray-900 text-center";
+const CELL_C = "px-4 text-[16px] text-gray-900 text-center";
 const BTN = "h-10 px-5 rounded-lg font-semibold shadow-sm border disabled:opacity-50";
 const BTN_SKY = clsx(BTN, "bg-[#CFE8FF] border-[#9AC9F3] hover:brightness-95");
 const BTN_RED = clsx(BTN, "bg-[#FFD1D1] border-[#F2A2A2] hover:brightness-95");
@@ -121,47 +121,48 @@ export default function AdministratorPage() {
           <div className="mt-4 w-full overflow-x-auto">
             <table className="w-full table-fixed border-collapse">
               <colgroup>
-                <col style={{ width: 260 }} />
-                <col style={{ width: 260 }} />
-                <col style={{ width: 260 }} />
-                <col style={{ width: 260 }} />
+                <col style={{ width: 56 }} />
+                <col style={{ width: "20%" }} />
+                <col style={{ width: "18%"  }} />
+                <col style={{ width: "20%"  }} />
+                <col style={{ width: "40%"  }} />
                 <col />
               </colgroup>
 
               <thead className="bg-white">
                 <tr className="border-b-2 border-gray-300">
-                  <th className={HEAD_L}>
+                  <th className="p-0">
                     <input
                       aria-label="전체 선택"
                       type="checkbox"
-                      className="h-4 w-4 align-middle"
+                      className="h-4 w-4 block mx-auto align-middle"
                       checked={allChecked}
                       onChange={toggleAll}
                     />
                   </th>
                   <th className={HEAD_L}>아이디</th>
                   <th className={HEAD_C}>비밀번호</th>
-                  <th className={HEAD_C}>계정명</th>
-                  <th className={HEAD_C}>설명</th>
+                  <th className={HEAD_L}>계정명</th>
+                  <th className={HEAD_L}>설명</th>
                 </tr>
               </thead>
 
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id} className={ROW}>
-                    <td className="pl-6 pr-20">
+                    <td className="p-0">
                       <input
                         aria-label={`${row.username} 선택`}
                         type="checkbox"
-                        className="h-4 w-4 align-middle"
+                        className="h-4 w-4 block mx-auto align-middle"
                         checked={selected.has(row.id)}
                         onChange={() => toggleOne(row.id)}
                       />
                     </td>
                     <td className={clsx(CELL_L, "font-semibold")}>{row.username}</td>
                     <td className={CELL_C}>{"•".repeat(6)}</td>
-                    <td className={CELL_C}>{row.name}</td>
-                    <td className={CELL_C}>{row.description ?? "-"}</td>
+                    <td className={CELL_L}>{row.name}</td>
+                    <td className={CELL_L}>{row.description ?? "-"}</td>
                   </tr>
                 ))}
 
