@@ -129,7 +129,7 @@ function SensorRegisterForm({
 
   const errors = {
     roomNo: !isValidRoomNumber(roomNo)
-      ? "강의실 번호를 확인해주세요. (문자/숫자/공백/-/_ 허용)"
+      ? "공간 이름을 확인해주세요. (문자/숫자/공백/-/_ 허용)"
       : "",
     macAddress: !isValidMac(macAddress)
       ? "MAC 주소 형식이 올바르지 않습니다. (예: 0C:7B:C8:FF:56:F1)"
@@ -163,7 +163,7 @@ function SensorRegisterForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <Field
-        label="№ 강의실 번호"
+        label="№ 공간 이름"
         placeholder="예) 세미나실-1 / E-204 / 본관 B1-회의실"
         value={roomNo}
         onChange={setRoomNo}
@@ -255,7 +255,7 @@ function SensorDeleteForm({
     <>
       <form onSubmit={handleOpenConfirm} className="space-y-6" noValidate>
         <Field
-          label="№ 강의실 번호"
+          label="№ 공간 이름"
           placeholder="예) 세미나실-1 / E-204 / 본관 B1-회의실"
           value={roomNo}
           onChange={setRoomNo}
