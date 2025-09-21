@@ -15,11 +15,11 @@ import { useDeleteAdminAccountsMutation } from "@/state/mutations/admin/useDelet
 const CARD = "bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-gray-200";
 const TITLE = "text-[22px] font-extrabold";
 const HEAD_BASE = "text-[17px] font-bold text-gray-900 py-3";
-const HEAD_L = clsx(HEAD_BASE, "text-left px-6");
-const HEAD_C = clsx(HEAD_BASE, "text-center px-8");
+const HEAD_L = clsx(HEAD_BASE, "text-left px-4");
+const HEAD_C = clsx(HEAD_BASE, "text-center px-6");
 const ROW = "h-[68px] border-b border-gray-200";
-const CELL_L = "px-6 text-[16px] text-gray-900 text-left";
-const CELL_C = "px-8 text-[16px] text-gray-900 text-center";
+const CELL_L = "px-4 text-[16px] text-gray-900 text-left";
+const CELL_C = "px-6 text-[16px] text-gray-900 text-center";
 const BTN = "h-10 px-5 rounded-lg font-semibold shadow-sm border disabled:opacity-50";
 const BTN_SKY = clsx(BTN, "bg-[#CFE8FF] border-[#9AC9F3] hover:brightness-95");
 const BTN_RED = clsx(BTN, "bg-[#FFD1D1] border-[#F2A2A2] hover:brightness-95");
@@ -124,7 +124,7 @@ export default function AdministratorPage() {
                 <col style={{ width: 260 }} />
                 <col style={{ width: 260 }} />
                 <col style={{ width: 260 }} />
-                <col style={{ width: 450 }} />
+                <col style={{ width: 260 }} />
                 <col />
               </colgroup>
 
