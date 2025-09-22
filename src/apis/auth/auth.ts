@@ -9,5 +9,5 @@ export const logIn = async (data: LogInRequestData): Promise<string> => {
 };
 
 export const logOut = async (): Promise<void> => {
-  await axiosInstance.post<LogOutResponseData>('/api/log-out');
+  await axiosInstance.post<LogOutResponseData>('/api/logout');
 };
