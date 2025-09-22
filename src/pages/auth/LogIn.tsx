@@ -71,11 +71,6 @@ const LoginPage = () => {
       {/* 아이디 기억 체크박스 */}
 <div className="absolute left-1/2 -translate-x-1/2 top-[622px] w-[525px]">
   <div className="flex justify-end items-center text-black font-inter text-sm">
-    <input
-      id="rememberId"
-      type="checkbox"
-      className="w-4 h-4 mr-2 accent-[var(--orange)]"
-    />
    <input
   id="rememberId"
   type="checkbox"
@@ -83,6 +78,7 @@ const LoginPage = () => {
   checked={rememberId}
   onChange={(e) => setRememberId(e.target.checked)}
 />
+<label htmlFor="rememberId">아이디 기억</label>
   </div>
 </div>
 
