@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Inquiry from '@/components/auth/Inquiry';
 import LogIn from '@/components/auth/LogIn';
@@ -8,14 +8,28 @@ import { useLoginStore } from '@/state/store/loginStore';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
+  const [rememberId, setRememberId] = useState(false);
   const [password, setPassword] = useState('');
   const login = useLoginStore((state) => state.login);
   const navigate = useNavigate(); 
+
+  useEffect(() => {
+  const savedId = localStorage.getItem('rememberedId');
+  if (savedId) {
+    setUsername(savedId);
+    setRememberId(true);
+  }
+}, []);
 
   const handleLogin = async () => {
     try {
       const accessToken = await logIn({ username, password });
       login(accessToken);
+      if (rememberId) {
+      localStorage.setItem('rememberedId', username);
+    } else {
+      localStorage.removeItem('rememberedId');
+    }
       console.log('로그인 성공');
       navigate('/main');
     } catch (error) {
@@ -62,7 +76,13 @@ const LoginPage = () => {
       type="checkbox"
       className="w-4 h-4 mr-2 accent-[var(--orange)]"
     />
-    <label htmlFor="rememberId">아이디 기억</label>
+   <input
+  id="rememberId"
+  type="checkbox"
+  className="w-4 h-4 mr-2 accent-[var(--orange)]"
+  checked={rememberId}
+  onChange={(e) => setRememberId(e.target.checked)}
+/>
   </div>
 </div>
 
