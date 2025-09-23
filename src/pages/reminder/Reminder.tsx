@@ -1,10 +1,12 @@
 // src/pages/Reminder.tsx
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import clsx from "clsx";
 import { ActiveNavContext } from "@/contexts/ActiveNavContext";
 import { useSetPageTitle } from "@/hooks/common/useSetPageTitle";
 import { useSetActiveNav } from "@/hooks/common/useSetActiveNav";
+import { useAlarmSettingsQuery } from "@/state/queries/alarm/useAlarmSettingsQuery";
+import { useUpdateAlarmSettingsMutation } from "@/state/mutations/alarm/useUpdateAlarmSettingsMutation";
 
 type HM = { hour: string; minute: string };
 
@@ -30,34 +32,44 @@ function isHMValid(hm: HM) {
   return !Number.isNaN(h) && !Number.isNaN(m) && h >= 0 && h <= 23 && m >= 0 && m <= 59;
 }
 const fmt = (hm: HM) => `${hm.hour}시간 ${hm.minute}분`;
+const hmToMinutes = (hm: HM) => Number(hm.hour) * 60 + Number(hm.minute);
+const minutesToHM = (mins: number): HM => {
+  const h = Math.floor((mins ?? 0) / 60);
+  const m = (mins ?? 0) % 60;
+  return { hour: String(h), minute: String(m) };
+};
 
 /* ── 페이지 ──────────────────────────────────────────────── */
 export default function ReminderPage() {
   useSetPageTitle("위험 단계 재알림 설정");
   useSetActiveNav("sensor", "reminder");
-  // 사이드바 활성 (센서 관리 > 재알람 설정)
   const activeNav = useContext(ActiveNavContext);
   useEffect(() => {
     activeNav?.setActiveNav({ group: "sensor", item: "reminder" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 폼 상태
+  
+  const { data, isLoading } = useAlarmSettingsQuery();
+  const { mutate: updateSettings, isPending } = useUpdateAlarmSettingsMutation();
+
+ 
   const [dangerHM, setDangerHM]   = useState<HM>({ hour: "", minute: "" }); // 위험
   const [warnHM, setWarnHM]       = useState<HM>({ hour: "", minute: "" }); // 경고
   const [afterActHM, setAfterAct] = useState<HM>({ hour: "", minute: "" }); // 조치 후
 
+
+  useEffect(() => {
+    if (!data) return;
+    setDangerHM(minutesToHM(data.dangerNotificationMinutes ?? 0));
+    setWarnHM(minutesToHM(data.cautionNotificationMinutes ?? 0));
+    setAfterAct(minutesToHM(data.duplicatePreventionMinutes ?? 0));
+  }, [data]);
+
   const isLeftValid  = isHMValid(dangerHM) && isHMValid(warnHM);
   const isRightValid = isHMValid(afterActHM);
 
-  // 초기값 로드 (데모용 — API 연동 시 교체)
-  useEffect(() => {
-    setDangerHM({ hour: "1", minute: "0" });
-    setWarnHM({ hour: "0", minute: "30" });
-    setAfterAct({ hour: "1", minute: "0" });
-  }, []);
 
-  // 공통 입력 핸들러
   const onHMChange =
     (setter: Dispatch<SetStateAction<HM>>, key: keyof HM) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,22 +81,45 @@ export default function ReminderPage() {
   const resetLeft = () => { setDangerHM({ hour: "", minute: "" }); setWarnHM({ hour: "", minute: "" }); };
   const resetRight = () => setAfterAct({ hour: "", minute: "" });
 
-  const handleSaveLevels = async () => {
+
+  const bodyForPut = useMemo(() => ({
+    dangerNotificationMinutes:  isHMValid(dangerHM) ? hmToMinutes(dangerHM) : undefined,
+    cautionNotificationMinutes: isHMValid(warnHM)   ? hmToMinutes(warnHM)   : undefined,
+    duplicatePreventionMinutes: isHMValid(afterActHM) ? hmToMinutes(afterActHM) : undefined,
+  }), [dangerHM, warnHM, afterActHM]);
+
+  const handleSaveLevels = () => {
     if (!isLeftValid) return;
-    // TODO: await api.save({ danger: dangerHM, warn: warnHM });
-    alert(`[저장] 위험 ${fmt(dangerHM)} / 경고 ${fmt(warnHM)}`);
+    updateSettings(
+      {
+        dangerNotificationMinutes:  bodyForPut.dangerNotificationMinutes ?? 0,
+        cautionNotificationMinutes: bodyForPut.cautionNotificationMinutes ?? 0,
+        duplicatePreventionMinutes: bodyForPut.duplicatePreventionMinutes ?? (data?.duplicatePreventionMinutes ?? 0),
+      },
+      {
+        onSuccess: () => alert(`[저장 완료] 위험 ${fmt(dangerHM)} / 경고 ${fmt(warnHM)}`),
+      }
+    );
   };
-  const handleSaveAfterAct = async () => {
+
+  const handleSaveAfterAct = () => {
     if (!isRightValid) return;
-    // TODO: await api.save({ afterAction: afterActHM });
-    alert(`[저장] 조치 후 ${fmt(afterActHM)}`);
+    updateSettings(
+      {
+        dangerNotificationMinutes:  bodyForPut.dangerNotificationMinutes ?? (data?.dangerNotificationMinutes ?? 0),
+        cautionNotificationMinutes: bodyForPut.cautionNotificationMinutes ?? (data?.cautionNotificationMinutes ?? 0),
+        duplicatePreventionMinutes: bodyForPut.duplicatePreventionMinutes ?? 0,
+      },
+      {
+        onSuccess: () => alert(`[저장 완료] 조치 후 ${fmt(afterActHM)}`),
+      }
+    );
   };
+
+  const isBusy = isLoading || isPending;
 
   return (
     <div className="w-full">
-      {/* 상단 회색 바/구분선은 사용하지 않음 */}
-
-      {/* 좌/우 카드: 간격 넓힘 */}
       <div className="mt-4 grid grid-cols-1 gap-25 xl:grid-cols-[minmax(0,1fr)_420px]">
         {/* 왼쪽: 단계별 */}
         <section className={clsx(CARD, "p-6")}>
@@ -98,10 +133,8 @@ export default function ReminderPage() {
           {/* 위험 */}
           <div className="mt-6 space-y-4">
             <div className="flex flex-col gap-1">
-            <span className="text-[16px] font-semibold">• 위험 단계 재알림 주기</span>
-            <p  className="text-gray-500 text-sm">
-                위험 단계는 보다 짧은 주기를 설정할 것을 권장합니다.
-            </p>  
+              <span className="text-[16px] font-semibold">• 위험 단계 재알림 주기</span>
+              <p className="text-gray-500 text-sm">위험 단계는 보다 짧은 주기를 설정할 것을 권장합니다.</p>
             </div>
             <div className="flex items-center gap-4 mt-3">
               <input
@@ -111,6 +144,7 @@ export default function ReminderPage() {
                 onChange={onHMChange(setDangerHM, "hour")}
                 inputMode="numeric"
                 maxLength={2}
+                disabled={isBusy}
               />
               <input
                 className={FIELD + " w-full"}
@@ -119,6 +153,7 @@ export default function ReminderPage() {
                 onChange={onHMChange(setDangerHM, "minute")}
                 inputMode="numeric"
                 maxLength={2}
+                disabled={isBusy}
               />
             </div>
             {!isHMValid(dangerHM) && (
@@ -137,6 +172,7 @@ export default function ReminderPage() {
                 onChange={onHMChange(setWarnHM, "hour")}
                 inputMode="numeric"
                 maxLength={2}
+                disabled={isBusy}
               />
               <input
                 className={FIELD + " w-full"}
@@ -145,6 +181,7 @@ export default function ReminderPage() {
                 onChange={onHMChange(setWarnHM, "minute")}
                 inputMode="numeric"
                 maxLength={2}
+                disabled={isBusy}
               />
             </div>
             {!isHMValid(warnHM) && (
@@ -154,10 +191,15 @@ export default function ReminderPage() {
 
           {/* 액션 */}
           <div className="mt-8 flex gap-2">
-            <button type="button" className={clsx(SAVE_BTN, "flex-1")} onClick={handleSaveLevels} disabled={!isLeftValid}>
+            <button
+              type="button"
+              className={clsx(SAVE_BTN, "flex-1")}
+              onClick={handleSaveLevels}
+              disabled={!isLeftValid || isBusy}
+            >
               저장하기
             </button>
-            <button type="button" className={clsx(GHOST_BTN, "px-4")} onClick={resetLeft}>
+            <button type="button" className={clsx(GHOST_BTN, "px-4")} onClick={resetLeft} disabled={isBusy}>
               초기화
             </button>
           </div>
@@ -180,6 +222,7 @@ export default function ReminderPage() {
                 onChange={onHMChange(setAfterAct, "hour")}
                 inputMode="numeric"
                 maxLength={2}
+                disabled={isBusy}
               />
               <input
                 className={FIELD + " w-full"}
@@ -188,6 +231,7 @@ export default function ReminderPage() {
                 onChange={onHMChange(setAfterAct, "minute")}
                 inputMode="numeric"
                 maxLength={2}
+                disabled={isBusy}
               />
             </div>
             {!isRightValid && (
@@ -196,10 +240,15 @@ export default function ReminderPage() {
           </div>
 
           <div className="mt-8 flex gap-2">
-            <button type="button" className={clsx(SAVE_BTN, "flex-1")} onClick={handleSaveAfterAct} disabled={!isRightValid}>
+            <button
+              type="button"
+              className={clsx(SAVE_BTN, "flex-1")}
+              onClick={handleSaveAfterAct}
+              disabled={!isRightValid || isBusy}
+            >
               저장하기
             </button>
-            <button type="button" className={clsx(GHOST_BTN, "px-4")} onClick={resetRight}>
+            <button type="button" className={clsx(GHOST_BTN, "px-4")} onClick={resetRight} disabled={isBusy}>
               초기화
             </button>
           </div>
@@ -208,4 +257,3 @@ export default function ReminderPage() {
     </div>
   );
 }
-
