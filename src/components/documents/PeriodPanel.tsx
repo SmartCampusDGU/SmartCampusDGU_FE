@@ -6,6 +6,7 @@ import { DownloadIcon } from "@/assets/icons/DownloadIcon";
 import DateBoxOnlyIcon from "./DateBox";
 import styles from "./DatePicker.module.css";
 import { useOutlierReportMutation } from "@/state/mutations/documents/useOutlierReportMutation";
+import { toLocalDateTimeString } from "@/utils/documents/toLocalDateTimeString";
 
 type PeriodPanelProps = {
   onPreview?: (url: string) => void;
@@ -47,8 +48,8 @@ export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
       return;
     }
 
-    const startDate = new Date(start.getFullYear(), start.getMonth(), 1).toISOString();
-    const endDate = new Date(end.getFullYear(), end.getMonth() + 1, 0).toISOString(); 
+  const startDate = toLocalDateTimeString(new Date(start.getFullYear(), start.getMonth(), 1, 0, 0, 0));
+  const endDate = toLocalDateTimeString(new Date(end.getFullYear(), end.getMonth() + 1, 0, 23, 59, 59));
 
     downloadReport(
       { startDate, endDate },
