@@ -5,6 +5,7 @@ import { RightArrowIcon } from "@/assets/icons/RightArrowIcon";
 import { DownloadIcon } from "@/assets/icons/DownloadIcon";
 import DateBoxOnlyIcon from "./DateBox";
 import styles from "./DatePicker.module.css";
+import { useOutlierReportMutation } from "@/state/mutations/documents/useOutlierReportMutation";
 
 type PeriodPanelProps = {
   onPreview?: (url: string) => void;
@@ -37,6 +38,37 @@ export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
   const [end, setEnd] = useState<Date | null>(addMonths(startOfMonth(new Date()), 1));
   const [openStart, setOpenStart] = useState(false);
   const [openEnd, setOpenEnd] = useState(false);
+
+  const { mutate: downloadReport, isPending } = useOutlierReportMutation();
+
+  const handleDownload = () => {
+    if (!start || !end) {
+      alert("시작일과 종료일을 모두 선택해주세요.");
+      return;
+    }
+
+    const startDate = new Date(start.getFullYear(), start.getMonth(), 1).toISOString();
+    const endDate = new Date(end.getFullYear(), end.getMonth() + 1, 0).toISOString(); 
+
+    downloadReport(
+      { startDate, endDate },
+      {
+        onSuccess: (url) => {
+          // 응답받은 URL로 다운로드 트리거
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "outlier-report.xlsx"; // 파일명은 필요에 따라 조정
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        },
+        onError: (err) => {
+          console.error("다운로드 실패:", err);
+          alert("보고서 다운로드에 실패했습니다.");
+        },
+      }
+    );
+  };
 
   const pickerCommon = useMemo(
     () => ({
@@ -162,6 +194,8 @@ export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
       <div className="absolute left-1/2 -translate-x-1/2 bottom-5">
         <button
           type="button"
+          onClick={handleDownload}
+          disabled={isPending}
           className="
             mt-[300px] w-[232px] h-[52px]
             rounded-[8px] border border-[#E5E5E5] bg-[#FFE9AE]
