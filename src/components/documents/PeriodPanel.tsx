@@ -52,23 +52,24 @@ export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
   const endDate = toLocalDateTimeString(new Date(end.getFullYear(), end.getMonth() + 1, 0, 23, 59, 59));
 
     downloadReport(
-      { startDate, endDate },
-      {
-        onSuccess: (url) => {
-          // 응답받은 URL로 다운로드 트리거
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "outlier-report.xlsx"; // 파일명은 필요에 따라 조정
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        },
-        onError: (err) => {
-          console.error("다운로드 실패:", err);
-          alert("보고서 다운로드에 실패했습니다.");
-        },
-      }
-    );
+  { startDate, endDate },
+  {
+    onSuccess: ({ blob, filename }) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    },
+    onError: (error) => {
+      console.error("다운로드 실패:", error);
+      alert("보고서 다운로드에 실패했습니다.");
+    },
+  }
+);
   };
 
   const pickerCommon = useMemo(
