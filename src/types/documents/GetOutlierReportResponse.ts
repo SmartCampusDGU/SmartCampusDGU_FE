@@ -1,1 +1,4 @@
-export type GetOutlierReportResponse = string;
+export interface GetOutlierReportResponse {
+  blob: Blob;
+  filename: string;
+}
