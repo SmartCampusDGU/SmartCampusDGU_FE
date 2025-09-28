@@ -10,9 +10,11 @@ export default function Documents() {
   useSetActiveNav("", "doc");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [previewFilename, setPreviewFilename] = useState("");
 
-  function handlePreview(url: string) {
+  function handlePreview(url: string, filename: string) {
     setPreviewUrl(url);
+    setPreviewFilename(filename);
     setPreviewOpen(true);
   }
 
@@ -23,7 +25,7 @@ export default function Documents() {
       </div>
 
       <PreviewModal open={previewOpen} onClose={() => setPreviewOpen(false)} title="미리보기">
-        <FilePreviewer src={previewUrl} />
+        <FilePreviewer src={previewUrl} filename={previewFilename}/>
       </PreviewModal>
     </div>
   );
