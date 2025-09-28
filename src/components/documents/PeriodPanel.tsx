@@ -5,11 +5,12 @@ import { RightArrowIcon } from "@/assets/icons/RightArrowIcon";
 import { DownloadIcon } from "@/assets/icons/DownloadIcon";
 import DateBoxOnlyIcon from "./DateBox";
 import styles from "./DatePicker.module.css";
-import { useOutlierReportMutation } from "@/state/mutations/documents/useOutlierReportMutation";
 import { toLocalDateTimeString } from "@/utils/documents/toLocalDateTimeString";
+import { fetchOutlierReportPreview } from "@/apis/documents/documents";
+import { useOutlierReportMutation } from "@/state/mutations/documents/useOutlierReportMutation";
 
 type PeriodPanelProps = {
-  onPreview?: (url: string) => void;
+  onPreview?: (url: string, filename: string) => void;
 };
 
 function startOfMonth(d: Date) {
@@ -26,14 +27,6 @@ function formatYM(d: Date | null) {
   return `${y}-${m}`;
 }
 
-function buildPreviewUrl(s: Date | null, e: Date | null) {
-  const qs = new URLSearchParams({
-    start: formatYM(s),
-    end: formatYM(e),
-  }).toString();
-  return `/api/reports/preview?${qs}`;
-}
-
 export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
   const [start, setStart] = useState<Date | null>(startOfMonth(new Date()));
   const [end, setEnd] = useState<Date | null>(addMonths(startOfMonth(new Date()), 1));
@@ -42,34 +35,52 @@ export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
 
   const { mutate: downloadReport, isPending } = useOutlierReportMutation();
 
+  const handlePreview = async () => {
+    if (!start || !end) {
+      alert("시작일과 종료일을 모두 선택해주세요.");
+      return;
+    }
+
+    const startDate = toLocalDateTimeString(new Date(start.getFullYear(), start.getMonth(), 1, 0, 0, 0));
+    const endDate = toLocalDateTimeString(new Date(end.getFullYear(), end.getMonth() + 1, 0, 23, 59, 59));
+
+    try {
+      const { objectUrl, filename } = await fetchOutlierReportPreview({ startDate, endDate });
+      onPreview?.(objectUrl, filename);
+    } catch (e) {
+      console.error("미리보기 실패", e);
+      alert("보고서 미리보기에 실패했습니다.");
+    }
+  };
+
   const handleDownload = () => {
     if (!start || !end) {
       alert("시작일과 종료일을 모두 선택해주세요.");
       return;
     }
 
-  const startDate = toLocalDateTimeString(new Date(start.getFullYear(), start.getMonth(), 1, 0, 0, 0));
-  const endDate = toLocalDateTimeString(new Date(end.getFullYear(), end.getMonth() + 1, 0, 23, 59, 59));
+    const startDate = toLocalDateTimeString(new Date(start.getFullYear(), start.getMonth(), 1, 0, 0, 0));
+    const endDate = toLocalDateTimeString(new Date(end.getFullYear(), end.getMonth() + 1, 0, 23, 59, 59));
 
     downloadReport(
-  { startDate, endDate },
-  {
-    onSuccess: ({ blob, filename }) => {
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    },
-    onError: (error) => {
-      console.error("다운로드 실패:", error);
-      alert("보고서 다운로드에 실패했습니다.");
-    },
-  }
-);
+      { startDate, endDate },
+      {
+        onSuccess: ({ blob, filename }) => {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        },
+        onError: (error) => {
+          console.error("다운로드 실패:", error);
+          alert("보고서 다운로드에 실패했습니다.");
+        },
+      }
+    );
   };
 
   const pickerCommon = useMemo(
@@ -83,9 +94,7 @@ export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
     [start, end]
   );
 
-  // 종료일은 항상 시작일보다 늦게: minEnd = start + 1개월
   const minEnd = start ? addMonths(start, 1) : undefined;
-  // 시작일은 (있다면) end - 1개월까지
   const maxStart = end ? addMonths(end, -1) : undefined;
 
   return (
@@ -105,79 +114,70 @@ export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
 
         {/* 시작일 */}
         <div className="absolute left-1/2 -translate-x-[calc(100%+100px)] flex items-center">
-          <div className="shrink-0 inline-block align-middle">
-            <DatePicker
-              selected={start ?? undefined}
-              onChange={(d) => {
-                if (!d) return;
-                const ns = startOfMonth(d);
-                setStart(ns);
-                // 현재 end가 ns보다 이르거나 같으면 end를 자동으로 ns+1개월로 보정
-                setEnd((prev) => {
-                  if (!prev || prev <= ns) return addMonths(ns, 1);
-                  return startOfMonth(prev);
-                });
-                setOpenStart(false);
-              }}
-              {...pickerCommon}
-              maxDate={maxStart}
-              open={openStart}
-              onCalendarClose={() => setOpenStart(false)}
-              calendarClassName={styles.dp}
-              popperClassName={styles.popper}
-              customInput={
-                <DateBoxOnlyIcon
-                  onIconClick={() => setOpenStart(true)}
-                  value={formatYM(start)}
-                />
-              }
-              selectsStart
-            />
-          </div>
+          <DatePicker
+            selected={start ?? undefined}
+            onChange={(d) => {
+              if (!d) return;
+              const ns = startOfMonth(d);
+              setStart(ns);
+              setEnd((prev) => {
+                if (!prev || prev <= ns) return addMonths(ns, 1);
+                return startOfMonth(prev);
+              });
+              setOpenStart(false);
+            }}
+            {...pickerCommon}
+            maxDate={maxStart}
+            open={openStart}
+            onCalendarClose={() => setOpenStart(false)}
+            calendarClassName={styles.dp}
+            popperClassName={styles.popper}
+            customInput={
+              <DateBoxOnlyIcon
+                onIconClick={() => setOpenStart(true)}
+                value={formatYM(start)}
+              />
+            }
+            selectsStart
+          />
 
-          {/* 종료일 쪽 버튼 공간 통일용 */}
-          <div style={{ width: 30, flex: "0 0 30px" }} aria-hidden />
-          <div className="w-[96px] h-[36px] shrink-0" aria-hidden />
+          <div style={{ width: 30 }} aria-hidden />
+          <div className="w-[96px] h-[36px]" aria-hidden />
         </div>
 
         {/* 종료일 */}
         <div className="absolute left-1/2 translate-x-[100px] flex items-center">
-          <div className="shrink-0 inline-block align-middle">
-            <DatePicker
-              selected={end ?? undefined}
-              onChange={(d) => {
-                if (!d) return;
-                const ne = startOfMonth(d);
-                // 시작일보다 빠르거나 같게 고르려 하면 강제로 start+1개월로 보정
-                if (start && ne <= start) {
-                  setEnd(addMonths(start, 1));
-                } else {
-                  setEnd(ne);
-                }
-                setOpenEnd(false);
-              }}
-              {...pickerCommon}
-              minDate={minEnd}
-              open={openEnd}
-              onCalendarClose={() => setOpenEnd(false)}
-              calendarClassName={styles.dp}
-              popperClassName={styles.popper}
-              customInput={
-                <DateBoxOnlyIcon
-                  onIconClick={() => setOpenEnd(true)}
-                  value={formatYM(end)}
-                />
+          <DatePicker
+            selected={end ?? undefined}
+            onChange={(d) => {
+              if (!d) return;
+              const ne = startOfMonth(d);
+              if (start && ne <= start) {
+                setEnd(addMonths(start, 1));
+              } else {
+                setEnd(ne);
               }
-              selectsEnd
-            />
-          </div>
+              setOpenEnd(false);
+            }}
+            {...pickerCommon}
+            minDate={minEnd}
+            open={openEnd}
+            onCalendarClose={() => setOpenEnd(false)}
+            calendarClassName={styles.dp}
+            popperClassName={styles.popper}
+            customInput={
+              <DateBoxOnlyIcon
+                onIconClick={() => setOpenEnd(true)}
+                value={formatYM(end)}
+              />
+            }
+            selectsEnd
+          />
 
-          {/* 버튼 간격 */}
-          <div style={{ width: 30, flex: "0 0 30px" }} aria-hidden />
-
+          <div style={{ width: 30 }} aria-hidden />
           <button
             type="button"
-            onClick={() => onPreview?.(buildPreviewUrl(start, end))}
+            onClick={handlePreview}
             className="
               w-[159px] h-[52px]
               border border-[#7C7C7C] rounded-[8px] bg-[#FFF2D9]
@@ -192,7 +192,7 @@ export default function PeriodPanel({ onPreview }: PeriodPanelProps) {
         </div>
       </div>
 
-      {/* 하단 중앙 다운로드 버튼 */}
+      {/* 하단 다운로드 버튼 */}
       <div className="absolute left-1/2 -translate-x-1/2 bottom-5">
         <button
           type="button"

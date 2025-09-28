@@ -22,3 +22,28 @@ export const getOutlierReport = async (
     filename,
   };
 };
+
+/**
+ * 이상치 통계 보고서 미리보기 Blob 요청
+ */
+export const fetchOutlierReportPreview = async (params: {
+  startDate: string;
+  endDate: string;
+}): Promise<{ objectUrl: string; filename: string }> => {
+  const response = await axiosInstance.get<Blob>(
+    "/api/outliers/report",
+    {
+      params,
+      responseType: "blob",
+    }
+  );
+
+  // Content-Disposition 헤더에서 파일명 추출
+  const disposition = response.headers["content-disposition"];
+  const match = disposition?.match(/filename="?(.+?)"?$/);
+  const filename = match?.[1] ?? "report.docx";
+
+  const objectUrl = URL.createObjectURL(response.data);
+
+  return { objectUrl, filename };
+};
