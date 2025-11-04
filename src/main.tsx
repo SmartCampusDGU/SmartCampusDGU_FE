@@ -3,6 +3,7 @@ import React from 'react';
 import './index.css'
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx'
+import './config/i18n'
 
 const queryClient = new QueryClient();
 

@@ -1,0 +1,13 @@
+{
+  "rssi": "RSSI",
+  "aqmScores": "AQM Scores",
+  "usbPowered": "USB Powered",
+  "temperature": "Temperature",
+  "humidity": "Humidity",
+  "tvoc": "TVOC",
+  "ambientNoise": "Ambient Noise",
+  "iaqIndex": "IAQ Index",
+  "batteryPercentage": "Battery Percentage",
+  "missedConnections": "Missed Connections",
+  "buttonPressed": "Button Pressed"
+}
