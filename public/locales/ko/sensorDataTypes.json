@@ -1,0 +1,13 @@
+{
+  "rssi": "RSSI",
+  "aqmScores": "AQM 점수",
+  "usbPowered": "USB 전원 연결 여부",
+  "temperature": "온도",
+  "humidity": "습도",
+  "tvoc": "총 휘발성 유기 화합물",
+  "ambientNoise": "주변 소음",
+  "iaqIndex": "실내 공기질 지수",
+  "batteryPercentage": "배터리 잔량",
+  "missedConnections": "연결 끊김 횟수",
+  "buttonPressed": "버튼 눌림 여부"
+}
