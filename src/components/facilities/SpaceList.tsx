@@ -32,8 +32,8 @@ export default function SpaceList() {
       : { page: 0, size: 20 };
 
   const { data } = useRoomsQuery(roomsQueryParams);
-  const roomList = data?.rooms ?? [];
-
+  const roomList = data?.data?.rooms ?? [];
+  
   const activeRoomTypeName = useMemo(() => {
     return roomTypes.find((rt) => rt.id === activeRoomType)?.name ?? '';
   }, [roomTypes, activeRoomType]);
