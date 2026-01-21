@@ -138,7 +138,7 @@ function SensorRegisterForm({
   const isValid = !errors.roomNo && !errors.macAddress;
 
   const resolveRoomId = () => {
-    const list = roomsData?.rooms ?? [];
+    const list = roomsData?.data?.rooms ?? [];
     const found = list.find((r: any) => r.roomNumber === roomNo.trim());
     return found?.id as number | undefined;
   };
