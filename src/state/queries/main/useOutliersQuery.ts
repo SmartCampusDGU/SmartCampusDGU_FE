@@ -3,7 +3,7 @@ import { getOutliers } from "@/apis/main/outliers";
 import type { OutlierLog } from "@/types/main/OutlierLog";
 import type { GetOutliersRequest } from "@/types/main/GetOutliersRequest";
 import type { GetOutliersResponse } from "@/types/main/GetOutliersResponse";
-import { alertMockData } from "@/mocks/main/alerts";
+// import { alertMockData } from "@/mocks/main/alerts";
 
 export const OUTLIERS_QUERY_KEY = ["outliers"];
 
@@ -47,21 +47,21 @@ export const useOutliersQuery = ({ searchRequest }: UseOutliersQueryParams = {})
         page++;
       }
 
-      if (allLogs.length === 0) {
-        return {
-          page: {
-            size: 0,
-            totalElements: 0,
-            currentElements: 0,
-            totalPages: 0,
-            currentPage: 0,
-            hasNextPage: false,
-            hasPreviousPage: false,
-            isLast: true,
-          },
-          outlierLogs: alertMockData,
-        };
-      }
+      // if (allLogs.length === 0) {
+      //   return {
+      //     page: {
+      //       size: 0,
+      //       totalElements: 0,
+      //       currentElements: 0,
+      //       totalPages: 0,
+      //       currentPage: 0,
+      //       hasNextPage: false,
+      //       hasPreviousPage: false,
+      //       isLast: true,
+      //     },
+      //     outlierLogs: alertMockData,
+      //   };
+      // }
 
       // 클라이언트 정렬: level > checkStatus > createdAt
       const sortedLogs = [...allLogs].sort((a, b) => {
