@@ -21,7 +21,8 @@ export default function Facilities() {
   useSetActiveNav("facility", "room-list");
 
   const createRoomMutation = useCreateRoomMutation();
-  const { data: roomTypes = [] } = useRoomTypesQuery();
+  const { data: roomTypesRes } = useRoomTypesQuery();
+  const roomTypes = roomTypesRes?.data?.roomTypes ?? [];
 
   const { data: sensorData } = useSensorDataTypesQuery();
  const sensorOptions = sensorData?.data ?? [];
