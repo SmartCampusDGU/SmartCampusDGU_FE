@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Tag from '@/components/facilities/Tag';
+import type { TagVariant } from '@/components/facilities/Tag';
 import ActionButton from "@/components/common/ActionButton";
 import { EditSpaceModal } from '../modals/EditSpaceModal';
 import type { SpaceFormValue } from '../modals/CreateSpaceModal';
@@ -146,14 +147,67 @@ export default function SpaceList() {
 });
   };
 
-  // 라벨 -> 태그 variant 매핑
-  const getTagVariant = (name: string): React.ComponentProps<typeof Tag>['variant'] => {
-    const n = name.toLowerCase();
-    if (["온도", "temperature", "temp"].some((k) => n.includes(k))) return "temperature";
-    if (["습도", "humidity", "humid"].some((k) => n.includes(k))) return "humidity";
-    if (["co2", "이산화탄소", "co₂"].some((k) => n.includes(k))) return "co2";
-    if (["tvoc", "voc"].some((k) => n.includes(k))) return "tvoc";
-    return "tvoc";
+  const getTagVariant = (name: string): TagVariant => {
+    const target = name.trim();
+    switch (target) {
+      // 1. Temperature (온도)
+      case "Temperature":
+      case "온도":
+        return "temperature";
+
+      // 2. Humidity (습도)
+      case "Humidity":
+      case "습도":
+        return "humidity";
+
+      // 3. TVOC (총 휘발성 유기 화합물)
+      case "TVOC":
+      case "총 휘발성 유기 화합물":
+        return "tvoc";
+
+      // 4. Ambient Noise (주변 소음)
+      case "Ambient Noise":
+      case "주변 소음":
+        return "noise";
+
+      // 5. IAQ Index (실내 공기질 지수)
+      case "IAQ Index":
+      case "실내 공기질 지수":
+        return "airQuality";
+
+      // 6. AQM Scores (AQM 점수)
+      case "AQM Scores":
+      case "AQM 점수":
+        return "airQuality";
+
+      // 7. Battery Percentage (배터리 잔량)
+      case "Battery Percentage":
+      case "배터리 잔량":
+        return "power";
+
+      // 8. USB Powered (USB 전원 연결 여부)
+      case "USB Powered":
+      case "USB 전원 연결 여부":
+        return "power";
+
+      // 9. RSSI (RSSI)
+      case "RSSI":
+        return "network";
+
+      // 10. Missed Connections (연결 끊김 횟수)
+      case "Missed Connections":
+      case "연결 끊김 횟수":
+        return "network";
+
+      // 11. Button Pressed (버튼 눌림 여부)
+      case "Button Pressed":
+      case "버튼 눌림 여부":
+        return "interaction";
+
+      // 정의되지 않은 데이터
+      default:
+        return "default";
+    }
   };
 
   return (
