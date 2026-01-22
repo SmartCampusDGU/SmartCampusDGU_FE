@@ -3,7 +3,8 @@ import { getOutliers } from "@/apis/main/outliers";
 import type { OutlierLog } from "@/types/main/OutlierLog";
 import type { GetOutliersRequest } from "@/types/main/GetOutliersRequest";
 import type { GetOutliersResponse } from "@/types/main/GetOutliersResponse";
-// import { alertMockData } from "@/mocks/main/alerts";
+import type { PageResponse } from "@/types/common/PageResponse";
+import { useTranslation } from 'react-i18next';
 
 export const OUTLIERS_QUERY_KEY = ["outliers"];
 
@@ -24,7 +25,17 @@ const checkStatusPriority: Record<OutlierLog["checkStatus"], number> = {
   CONFIRMED: 1,
 };
 
+type TranslatedOutlierLog = OutlierLog;
+interface OutliersQueryData {
+  page: PageResponse | null;
+  outlierLogs: OutlierLog[];
+}
+type TranslatedOutliersQueryData = Omit<OutliersQueryData, 'outlierLogs'> & {
+  outlierLogs: TranslatedOutlierLog[];
+};
+
 export const useOutliersQuery = ({ searchRequest }: UseOutliersQueryParams = {}) => {
+  const { t } = useTranslation();
   return useQuery({
     queryKey: [...OUTLIERS_QUERY_KEY, searchRequest],
     queryFn: async () => {
@@ -47,22 +58,6 @@ export const useOutliersQuery = ({ searchRequest }: UseOutliersQueryParams = {})
         page++;
       }
 
-      // if (allLogs.length === 0) {
-      //   return {
-      //     page: {
-      //       size: 0,
-      //       totalElements: 0,
-      //       currentElements: 0,
-      //       totalPages: 0,
-      //       currentPage: 0,
-      //       hasNextPage: false,
-      //       hasPreviousPage: false,
-      //       isLast: true,
-      //     },
-      //     outlierLogs: alertMockData,
-      //   };
-      // }
-
       // 클라이언트 정렬: level > checkStatus > createdAt
       const sortedLogs = [...allLogs].sort((a, b) => {
         const levelDiff = levelPriority[a.level] - levelPriority[b.level];
@@ -80,5 +75,20 @@ export const useOutliersQuery = ({ searchRequest }: UseOutliersQueryParams = {})
       };
     },
     staleTime: 1000 * 60,
+
+    select: (data) => {
+      const transformedLogs = data.outlierLogs.map((log) => ({
+        ...log,
+        dataTypeInfo: {
+          ...log.dataTypeInfo,
+          name: t(log.dataTypeInfo.name),
+        },
+      }));
+
+      return {
+        ...data,
+        outlierLogs: transformedLogs,
+      } as TranslatedOutliersQueryData;
+    },
   });
 };
