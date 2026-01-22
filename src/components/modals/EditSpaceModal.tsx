@@ -329,7 +329,8 @@ export function EditSpaceModal({
   onClose: () => void;
   onSave: (v: SpaceFormValue) => void;
 }) {
-  const { data: roomTypes = [] } = useRoomTypesQuery();
+  const { data: roomTypesRes } = useRoomTypesQuery();
+  const roomTypes = roomTypesRes?.data?.roomTypes ?? [];
 
   const [roomNo, setRoomNo] = useState(initial.roomNo);
   const [roomTypeId, setRoomTypeId] = useState<number | null>(initial.roomTypeId ?? null);
