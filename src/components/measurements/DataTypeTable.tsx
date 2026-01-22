@@ -17,7 +17,8 @@ export default function DataTypeTable({
   selectedIds,
   onSelectChange,
 }: DataTypeTableProps) {
-  const { data: roomTypes = [] } = useRoomTypesQuery();
+ const { data: roomTypesRes } = useRoomTypesQuery();
+  const roomTypes = roomTypesRes?.data?.roomTypes ?? [];
   const updateRoomTypeMutation = useUpdateRoomTypeMutation();
   const { data: sensorData } = useSensorDataTypesQuery();
   const sensorOptions = sensorData?.data ?? [];

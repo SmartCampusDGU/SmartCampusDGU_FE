@@ -13,7 +13,8 @@ import type { UpdateRoomRequest } from '@/types/facilities/UpdateRoomRequest';
 
 export default function SpaceList() {
   // 방 타입 목록(탭)
-  const { data: roomTypes = [] } = useRoomTypesQuery();
+  const { data: roomTypesRes } = useRoomTypesQuery();
+  const roomTypes = roomTypesRes?.data?.roomTypes ?? [];
 
   // 활성 탭: roomType 사용 (선택값)
   const [activeRoomType, setActiveRoomType] = useState<number | null>(null);
