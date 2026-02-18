@@ -11,7 +11,7 @@ import type { RoomDetail } from '@/types/facilities/RoomDetail';
  */
 export const getRooms = async (params: GetRoomsRequest = {}): Promise<RoomApiResponse<GetRoomsResponse>> => {
   const response = await axiosInstance.get<RoomApiResponse<GetRoomsResponse>>(
-    '/api/rooms',
+    'rooms',
     { params }
   );
 
@@ -22,7 +22,7 @@ export const getRooms = async (params: GetRoomsRequest = {}): Promise<RoomApiRes
  * 방 상세 조회
  */
 export const getRoomDetail = async (roomId: number): Promise<RoomApiResponse<RoomDetail>> => {
-  const response = await axiosInstance.get<RoomApiResponse<RoomDetail>>(`/api/rooms/${roomId}`);
+  const response = await axiosInstance.get<RoomApiResponse<RoomDetail>>(`rooms/${roomId}`);
   return response.data;
 };
 
@@ -30,7 +30,7 @@ export const getRoomDetail = async (roomId: number): Promise<RoomApiResponse<Roo
  * 방 생성
  */
 export const createRoom = async (data: CreateRoomRequest): Promise<RoomApiResponse<Record<string, number>>> => {
-  const response = await axiosInstance.post<RoomApiResponse<Record<string, number>>>('/api/rooms', data);
+  const response = await axiosInstance.post<RoomApiResponse<Record<string, number>>>('rooms', data);
   return response.data;
 };
 
@@ -41,6 +41,6 @@ export const updateRoom = async (
   roomId: number,
   data: UpdateRoomRequest
 ): Promise<RoomApiResponse<RoomDetail>> => {
-  const response = await axiosInstance.put<RoomApiResponse<RoomDetail>>(`/api/rooms/${roomId}`, data);
+  const response = await axiosInstance.put<RoomApiResponse<RoomDetail>>(`rooms/${roomId}`, data);
   return response.data;
 };

@@ -8,7 +8,7 @@ import type { DeleteRoomTypeResponse } from '@/types/measurements/DeleteRoomType
  */
 export const getRoomTypes = async (page=0, size=20): Promise<GetRoomTypesResponse> => {
   const params: Record<string, any> = { page, size };
-  const response = await axiosInstance.get<GetRoomTypesResponse>('/api/rooms/types', {
+  const response = await axiosInstance.get<GetRoomTypesResponse>('rooms/types', {
     params });
   return response.data;
 };
@@ -19,7 +19,7 @@ export const getRoomTypes = async (page=0, size=20): Promise<GetRoomTypesRespons
 export const createRoomType = async (
   data: CreateRoomTypeRequest
 ): Promise<RoomTypeResponseData> => {
-  const response = await axiosInstance.post<RoomTypeResponseData>('/api/rooms/types', data);
+  const response = await axiosInstance.post<RoomTypeResponseData>('rooms/types', data);
   return response.data;
 };
 
@@ -30,7 +30,7 @@ export const updateRoomType = async (
   roomTypeId: number,
   data: CreateRoomTypeRequest
 ): Promise<RoomTypeResponseData> => {
-  const response = await axiosInstance.put<RoomTypeResponseData>(`/api/rooms/types/${roomTypeId}`, data);
+  const response = await axiosInstance.put<RoomTypeResponseData>(`rooms/types/${roomTypeId}`, data);
   return response.data;
 };
 
@@ -40,6 +40,6 @@ export const updateRoomType = async (
 export const deleteRoomType = async (
   roomTypeId: number
 ): Promise<DeleteRoomTypeResponse> => {
-  const response = await axiosInstance.delete<DeleteRoomTypeResponse>(`/api/rooms/types/${roomTypeId}`);
+  const response = await axiosInstance.delete<DeleteRoomTypeResponse>(`rooms/types/${roomTypeId}`);
   return response.data;
 };

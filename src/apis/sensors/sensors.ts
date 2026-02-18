@@ -12,7 +12,7 @@ import type { GetSensorDataTypesResponse } from '@/types/sensors/GetSensorDataTy
 export const registerSensor = async (
   payload: RegisterSensorRequest
 ): Promise<RegisterSensorResponse> => {
-  const res = await axiosInstance.post<RegisterSensorResponse>('/api/sensors', payload, {
+  const res = await axiosInstance.post<RegisterSensorResponse>('sensors', payload, {
     headers: { 'Content-Type': 'application/json;charset=UTF-8' },
   });
   return res.data;
@@ -21,7 +21,7 @@ export const registerSensor = async (
 /** 센서 삭제 (POST /api/sensors/delete) */
 export async function deleteSensor(body: DeleteSensorBody): Promise<DeleteSensorResponse> {
   const res = await axiosInstance.post<DeleteSensorResponse>(
-    '/api/sensors/delete',
+    'sensors/delete',
     body,
     { headers: { 'Content-Type': 'application/json;charset=UTF-8' } }
   );
@@ -30,7 +30,7 @@ export async function deleteSensor(body: DeleteSensorBody): Promise<DeleteSensor
 
 /** 센서 데이터 타입 목록 (GET /api/sensors/data-types) */
 export const getSensorDataTypes = async (): Promise<GetSensorDataTypesResponse> => {
-  const res = await axiosInstance.get<GetSensorDataTypesResponse>('/api/sensors/data-types', {
+  const res = await axiosInstance.get<GetSensorDataTypesResponse>('sensors/data-types', {
     headers: { Accept: 'application/json;charset=UTF-8' },
   });
   return res.data;
