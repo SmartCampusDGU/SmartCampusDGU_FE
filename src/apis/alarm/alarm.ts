@@ -8,7 +8,7 @@ import type {
 // 조회
 export const getAlarmSettings = async (): Promise<AlarmSettings> => {
   const res = await axiosInstance.get<ApiEnvelope<AlarmSettings>>(
-    '/api/outliers/settings'
+    'outliers/settings'
   );
   return res.data.data;
 };
@@ -18,7 +18,7 @@ export const updateAlarmSettings = async (
   payload: UpdateAlarmSettingsRequest
 ): Promise<AlarmSettings> => {
   const res = await axiosInstance.put<ApiEnvelope<AlarmSettings>>(
-    '/api/outliers/settings',
+    'outliers/settings',
     payload
   );
   return res.data.data;

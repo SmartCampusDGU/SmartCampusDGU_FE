@@ -14,7 +14,7 @@ export const getOutliers = async (
   searchRequest?: GetOutliersRequest
 ): Promise<GetOutliersResponse> => {
   const params = { page, size, ...searchRequest };
-  const response = await axiosInstance.get<GetOutliersResponse>("/api/outliers", { params });
+  const response = await axiosInstance.get<GetOutliersResponse>("outliers", { params });
   return response.data;
 };
 
@@ -24,7 +24,7 @@ export const getOutliers = async (
 export const getOutlierDetail = async (
   outlierLogId: number
 ): Promise<GetOutlierDetailResponse> => {
-  const response = await axiosInstance.get<GetOutlierDetailResponse>(`/api/outliers/${outlierLogId}`);
+  const response = await axiosInstance.get<GetOutlierDetailResponse>(`outliers/${outlierLogId}`);
   return response.data;
 };
 
@@ -36,7 +36,7 @@ export const updateOutlierStatus = async (
   data: UpdateOutlierStatusRequest
 ): Promise<UpdateOutlierStatusResponse> => {
   const response = await axiosInstance.patch<UpdateOutlierStatusResponse>(
-    `/api/outliers/${outlierLogId}/status`,
+    `outliers/${outlierLogId}/status`,
     data
   );
   return response.data;

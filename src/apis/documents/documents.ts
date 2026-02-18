@@ -9,7 +9,7 @@ import { getFilenameFromContentDisposition } from '@/utils/documents/getFilename
 export const getOutlierReport = async (
   params: GetOutlierReportRequest
 ): Promise<GetOutlierReportResponse> => {
-  const response = await axiosInstance.get<Blob>('/api/outliers/report', {
+  const response = await axiosInstance.get<Blob>('outliers/report', {
     params,
     responseType: 'blob',
   });
@@ -31,7 +31,7 @@ export const fetchOutlierReportPreview = async (params: {
   endDate: string;
 }): Promise<{ objectUrl: string; filename: string }> => {
   const response = await axiosInstance.get<Blob>(
-    "/api/outliers/report",
+    "outliers/report",
     {
       params,
       responseType: "blob",

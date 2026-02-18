@@ -10,7 +10,7 @@ import type { DeleteMembersResponse } from '@/types/admin/DeleteMembersResponseT
 
 /** 조회 */
 export const getAdminAccounts = async (): Promise<GetAdminAccountsResponse> => {
-  const res = await axiosInstance.get<GetAdminAccountsResponse>('/api/members');
+  const res = await axiosInstance.get<GetAdminAccountsResponse>('members');
   return res.data;
 };
 
@@ -18,7 +18,7 @@ export const getAdminAccounts = async (): Promise<GetAdminAccountsResponse> => {
 export const getAdminAccountById = async (
   id: number
 ): Promise<GetAdminAccountByIdResponse> => {
-  const res = await axiosInstance.get(`/api/members/${id}`);
+  const res = await axiosInstance.get(`members/${id}`);
   return res.data.data;
 };
 
@@ -26,7 +26,7 @@ export const getAdminAccountById = async (
 export const createAdminAccount = async (
   payload: CreateMemberRequest
 ): Promise<CreateMemberResponse> => {
-  const res = await axiosInstance.post<CreateMemberResponse>('/api/members', payload);
+  const res = await axiosInstance.post<CreateMemberResponse>('members', payload);
   return res.data;
 };
 
@@ -42,7 +42,7 @@ export const updateAdminAccount = async (
 }
 
   const res = await axiosInstance.patch<UpdateMemberResponse>(
-    `/api/members/${id}`,
+    `members/${id}`,
     body
   );
   return res.data;
@@ -53,6 +53,6 @@ export const deleteAdminAccounts = async (
   ids: number[]
 ): Promise<DeleteMembersResponse> => {
   const body: DeleteMembersRequest = { ids };
-  const res = await axiosInstance.delete<DeleteMembersResponse>('/api/members', { data: body });
+  const res = await axiosInstance.delete<DeleteMembersResponse>('members', { data: body });
   return res.data;
 };
